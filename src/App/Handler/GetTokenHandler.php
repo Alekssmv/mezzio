@@ -28,6 +28,14 @@ class GetTokenHandler implements RequestHandlerInterface
                 throw new Exception('Parameter code is empty');
             }
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($_GET['code']);
+            saveToken( 
+                [
+                    'accessToken' => $accessToken->getToken(),
+                    'refreshToken' => $accessToken->getRefreshToken(),
+                    'expires' => $accessToken->getExpires(),
+                    'baseDomain' => $apiClient->getAccountBaseDomain(),
+                ]
+            );
         } catch (Exception $e) {
             die((string) $e);
         }
