@@ -19,6 +19,7 @@ return [
             App\Handler\ApiClient::class => App\Handler\ApiClientFactory::class,
             App\Handler\GetTokenHandler::class => App\Handler\GetTokenHandlerFactory::class,
             App\Handler\HttpClient::class => App\Handler\HttpClientFactory::class,
+            App\Handler\RedirectUriHandler::class => App\Handler\RedirectUriHandlerFactory::class,
             App\Handler\SumHandler::class => App\Handler\SumHandlerFactory::class,
         ],
     ],
