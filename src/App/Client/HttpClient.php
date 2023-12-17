@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Handler;
+namespace App\Client;
 
 use GuzzleHttp\Client;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class HttpClient 
+class HttpClient implements RequestHandlerInterface
 {
     public function __construct(private Client $httpClient)
     {

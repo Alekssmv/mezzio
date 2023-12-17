@@ -6,6 +6,8 @@ namespace App\Handler;
 
 use Psr\Container\ContainerInterface;
 use App\Handler\GetTokenHandler;
+use App\Client\ApiClient;
+use App\Client\HttpClient;
 
 class GetTokenHandlerFactory
 {

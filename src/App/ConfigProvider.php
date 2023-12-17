@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App;
 
-use AmoCRM\Client\AmoCRMApiClient;
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
+use App\Client\ApiClient;
+use App\Client\ApiClientFactory;
+use App\Client\HttpClient;
+use App\Client\HttpClientFactory;
 
 /**
  * The configuration provider for the App module
@@ -42,10 +43,12 @@ class ConfigProvider
                 Handler\HomePageHandler::class => Handler\HomePageHandlerFactory::class,
                 Handler\SumHandler::class => Handler\SumHandlerFactory::class,
                 Handler\GetTokenHandler::class => Handler\GetTokenHandlerFactory::class,
-                Handler\ApiClient::class => Handler\ApiClientFactory::class,
             ],
+            'clients' => [
+                ApiClient::class => ApiClientFactory::class,
+                HttpClient::class => HttpClientFactory::class,
+            ]
         ];
-
     }
 
     /**

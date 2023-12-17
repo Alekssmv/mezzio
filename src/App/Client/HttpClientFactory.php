@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Handler;
+namespace App\Client;
 
-use GuzzleHttp\Client;
 use Psr\Container\ContainerInterface;
+use GuzzleHttp\Client;
 
 class HttpClientFactory
 {
-    public function __invoke(ContainerInterface $container) : Client
+    public function __invoke(ContainerInterface $container): Client
     {
         return new Client();
     }
