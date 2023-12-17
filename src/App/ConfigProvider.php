@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App;
 
+use AmoCRM\Client\AmoCRMApiClient;
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+
 /**
  * The configuration provider for the App module
  *
@@ -21,7 +25,7 @@ class ConfigProvider
     {
         return [
             'dependencies' => $this->getDependencies(),
-            'templates'    => $this->getTemplates(),
+            'templates' => $this->getTemplates(),
         ];
     }
 
@@ -34,12 +38,14 @@ class ConfigProvider
             'invokables' => [
                 Handler\PingHandler::class => Handler\PingHandler::class,
             ],
-            'factories'  => [
+            'factories' => [
                 Handler\HomePageHandler::class => Handler\HomePageHandlerFactory::class,
                 Handler\SumHandler::class => Handler\SumHandlerFactory::class,
                 Handler\GetTokenHandler::class => Handler\GetTokenHandlerFactory::class,
+                Handler\ApiClient::class => Handler\ApiClientFactory::class,
             ],
         ];
+
     }
 
     /**
@@ -49,8 +55,8 @@ class ConfigProvider
     {
         return [
             'paths' => [
-                'app'    => ['templates/app'],
-                'error'  => ['templates/error'],
+                'app' => ['templates/app'],
+                'error' => ['templates/error'],
                 'layout' => ['templates/layout'],
             ],
         ];
