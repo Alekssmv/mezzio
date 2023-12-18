@@ -16,6 +16,8 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
+session_start();
+
 /**
  * Self-called anonymous function that creates its own scope and keeps the global namespace clean.
  */
