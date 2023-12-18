@@ -21,29 +21,16 @@ class GetTokenHandler implements RequestHandlerInterface
     }
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        session_start();
         $apiClient = $this->apiClient->setAccountBaseDomain('testasmirnov.amocrm.ru');
         try {
             if (empty($_GET['code'])) {
                 throw new Exception('Parameter code is empty');
             }
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($_GET['code']);
-            saveToken( 
-                [
-                    'accessToken' => $accessToken->getToken(),
-                    'refreshToken' => $accessToken->getRefreshToken(),
-                    'expires' => $accessToken->getExpires(),
-                    'baseDomain' => $apiClient->getAccountBaseDomain(),
-                ]
-            );
         } catch (Exception $e) {
             die((string) $e);
         }
 
-        $httpClient = $this->httpClient;
-        $httpClient->post($_ENV["AMO_REDIRECT_URI"], [
-            'json' => $accessToken->jsonSerialize(),
-        ]);
         return new JsonResponse($accessToken->jsonSerialize());
     }
 }
