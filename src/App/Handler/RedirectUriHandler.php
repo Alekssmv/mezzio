@@ -25,8 +25,17 @@ class RedirectUriHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            $this->httpClient->request('GET', 'https://05ab-5-182-36-14.ngrok-free.app' . '/api/v1/token?code=' . $_GET['code']);
-            
+            // Get the public url of the tunnel
+            $response = $this->httpClient->request('GET', 'https://api.ngrok.com/tunnels', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $_ENV["NGROK_API_TOKEN"],
+                    'Ngrok-Version' => '2'
+                ]
+            ]);
+            $url = json_decode($response->getBody()->getContents(), true)['tunnels'][0]['public_url'];
+            // Save the access token to the file
+            $this->httpClient->request('GET', $url . '/api/v1/token?code=' . $_GET['code']);
+
             $accessToken = getToken();
 
             $ownerDetails = $this->apiClient->getOAuthClient()->getResourceOwner($accessToken);
