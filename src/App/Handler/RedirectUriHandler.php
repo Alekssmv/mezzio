@@ -25,27 +25,17 @@ class RedirectUriHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            $response = $this->httpClient->request('GET', 'https://0f7e-5-182-36-14.ngrok-free.app/api/v1/token?code=' . $_GET['code']);
-            dd($response->getBody()->getContents());
+            $this->httpClient->request('GET', 'https://05ab-5-182-36-14.ngrok-free.app' . '/api/v1/token?code=' . $_GET['code']);
             
-            saveToken(
-                [
-                    'accessToken' => $json['access_token'],
-                    'refreshToken' => $json['refresh_token'],
-                    'expires' => $json['expires_in'],
-                    'baseDomain' => $this->apiClient->getAccountBaseDomain(),
-                ]
-            );
             $accessToken = getToken();
+
             $ownerDetails = $this->apiClient->getOAuthClient()->getResourceOwner($accessToken);
         } catch (\Exception $e) {
             echo $e->getMessage();
         }
+        $data = $ownerDetails->toArray();
         return new HtmlResponse($this->renderer->render(
-            'app::redirect-uri',
-            [
-                'ownerDetails' => $ownerDetails->toArray()
-            ]
+            'app::redirect-uri', $data
         ));
     }
 }
