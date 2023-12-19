@@ -86,7 +86,7 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         try {
             $apiClient->getOAuthClient()->getHttpClient()->request('POST', $_ENV["AMO_REDIRECT_URI"], [
-                'token' => [
+                'json' => [
                     'access_token' => $accessToken->getToken(),
                     'refresh_token' => $accessToken->getRefreshToken(),
                     'expires' => $accessToken->getExpires(),
