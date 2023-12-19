@@ -101,13 +101,17 @@ class GetTokenHandler implements RequestHandlerInterface
         /**
          * Полчение ngrok public url туннеля
          */
-        $response = $this->$apiClient->getHttpClient()->request('GET', 'https://api.ngrok.com/tunnels', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $_ENV["NGROK_API_TOKEN"],
-                'Ngrok-Version' => '2'
-            ]
-        ]);
-        $url = json_decode($response->getBody()->getContents(), true)['tunnels'][0]['public_url'];
+        try {
+            $response = $this->$apiClient->getHttpClient()->request('GET', 'https://api.ngrok.com/tunnels', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $_ENV["NGROK_API_TOKEN"],
+                    'Ngrok-Version' => '2'
+                ]
+            ]);
+            $url = json_decode($response->getBody()->getContents(), true)['tunnels'][0]['public_url'];
+        } catch (Exception $e) {
+            die((string) $e);
+        }
 
         return new RedirectResponse($url . '/redirect-uri');
     }
