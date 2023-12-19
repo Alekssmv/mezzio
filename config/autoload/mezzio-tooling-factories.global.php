@@ -13,7 +13,12 @@ declare(strict_types=1);
 return [
     'dependencies' => [
         'factories' => [
-            App\Handler\Sum::class => App\Handler\SumFactory::class,
+            App\Client\ApiClient::class => App\Client\ApiClientFactory::class,
+            App\Client\HttpClient::class => App\Client\HttpClientFactory::class,
+            App\Handle\HttpClient::class => App\Handle\HttpClientFactory::class,
+            App\Handler\ApiClient::class => App\Handler\ApiClientFactory::class,
+            App\Handler\GetTokenHandler::class => App\Handler\GetTokenHandlerFactory::class,
+            App\Handler\HttpClient::class => App\Handler\HttpClientFactory::class,
             App\Handler\SumHandler::class => App\Handler\SumHandlerFactory::class,
         ],
     ],

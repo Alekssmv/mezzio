@@ -42,4 +42,5 @@ return static function (Application $app, MiddlewareFactory $factory, ContainerI
     $app->get('/', App\Handler\HomePageHandler::class, 'home');
     $app->get($apiPrefix . '/ping', App\Handler\PingHandler::class, 'api.ping');
     $app->get($apiPrefix . '/sum/{a:\d+}/{b:\d+}', App\Handler\SumHandler::class, 'api.sum');
+    $app->get($apiPrefix . '/token', App\Handler\GetTokenHandler::class, 'api.token');
 };
