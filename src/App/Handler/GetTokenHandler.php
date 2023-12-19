@@ -6,10 +6,12 @@ namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
 use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Exception;
+use Mezzio\Application;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
@@ -18,9 +20,9 @@ class GetTokenHandler implements RequestHandlerInterface
     ) {
     }
     /**
-     * Сохраняет токен в TOKEN_FILE
+     * Сохраняет токен в TOKEN_FILE локально
      * Отправляет токен на вебхук
-     * Возвращает json ответ, если все прошло успешно
+     * Возвращает redirect на ngrok public url туннеля на маршрут /redirect-uri
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -97,8 +99,17 @@ class GetTokenHandler implements RequestHandlerInterface
             die((string) $e);
         }
 
-        return new JsonResponse([
-            'success' => 'true',
+        /**
+         * Полчение ngrok public url туннеля
+         */
+        $response = $this->$apiClient->getHttpClient()->request('GET', 'https://api.ngrok.com/tunnels', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $_ENV["NGROK_API_TOKEN"],
+                'Ngrok-Version' => '2'
+            ]
         ]);
+        $url = json_decode($response->getBody()->getContents(), true)['tunnels'][0]['public_url'];
+
+        return new RedirectResponse($url . '/redirect-uri');
     }
 }
