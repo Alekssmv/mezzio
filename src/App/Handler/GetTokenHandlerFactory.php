@@ -7,7 +7,6 @@ namespace App\Handler;
 use AmoCRM\Client\AmoCRMApiClient;
 use Psr\Container\ContainerInterface;
 use App\Handler\GetTokenHandler;
-use GuzzleHttp\Client;
 
 class GetTokenHandlerFactory
 {
@@ -18,8 +17,6 @@ class GetTokenHandlerFactory
             $_ENV["AMO_CLIENT_SECRET"],
             $_ENV["AMO_REDIRECT_URI"],
         );
-        $httpClient = new Client();
-        
-        return new GetTokenHandler($apiClient, $httpClient);
+        return new GetTokenHandler($apiClient);
     }
 }

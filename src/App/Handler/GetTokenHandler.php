@@ -6,36 +6,39 @@ namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
 use Laminas\Diactoros\Response\JsonResponse;
-use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use GuzzleHttp\Client;
 use Exception;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
     public function __construct(
-        private AmoCRMApiClient $apiClient,
-        private Client $httpClient,)
-    {
+        private AmoCRMApiClient $apiClient
+    ) {
     }
     /**
-     * Получение кода авторизации
-     * @param ServerRequestInterface $request
+     * Сохраняет токен в TOKEN_FILE
+     * Отправляет токен на вебхук
+     * Возвращает json ответ, если все прошло успешно
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        /**
+         * Праметры запроса
+         */
+        $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
 
-        if (isset($_GET['referer'])) {
-            $apiClient->setAccountBaseDomain($_GET['referer']);
+
+        if (isset($params['referer'])) {
+            $apiClient->setAccountBaseDomain($params['referer']);
         }
 
-        if (!isset($_GET['code'])) {
+        if (!isset($params['code'])) {
             $state = bin2hex(random_bytes(16));
             $_SESSION['oauth2state'] = $state;
-            if (isset($_GET['button'])) {
+            if (isset($params['button'])) {
                 echo $apiClient->getOAuthClient()->getOAuthButton(
                     [
                         'title' => 'Установить интеграцию',
@@ -55,17 +58,17 @@ class GetTokenHandler implements RequestHandlerInterface
                 header('Location: ' . $authorizationUrl);
                 die;
             }
-        } elseif (!isset($_GET['from_widget']) && (empty($_GET['state']) || empty($_SESSION['oauth2state']) || ($_GET['state'] !== $_SESSION['oauth2state']))) {
+        } elseif (!isset($params['from_widget']) && (empty($params['state']) || empty($_SESSION['oauth2state']) || ($params['state'] !== $_SESSION['oauth2state']))) {
             unset($_SESSION['oauth2state']);
             exit('Invalid state');
         }
-        
+
         /**
          * Ловим обратный код
          */
         try {
-            $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($_GET['code']);
-        
+            $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
+
             if (!$accessToken->hasExpired()) {
                 saveToken([
                     'accessToken' => $accessToken->getToken(),
@@ -75,10 +78,24 @@ class GetTokenHandler implements RequestHandlerInterface
                 ]);
             }
         } catch (Exception $e) {
-            die((string)$e);
+            die((string) $e);
         }
 
-        $apiClient->getOAuthClient()->getHttpClient()->request('GET', $_ENV["AMO_REDIRECT_URI"] . '?token=' . $accessToken->getToken());
+        /**
+         * Отправляем токен на вебхук
+         */
+        try {
+            $apiClient->getOAuthClient()->getHttpClient()->request('POST', $_ENV["AMO_REDIRECT_URI"], [
+                'token' => [
+                    'access_token' => $accessToken->getToken(),
+                    'refresh_token' => $accessToken->getRefreshToken(),
+                    'expires' => $accessToken->getExpires(),
+                    'base_domain' => $apiClient->getAccountBaseDomain(),
+                ],
+            ]);
+        } catch (Exception $e) {
+            die((string) $e);
+        }
 
         return new JsonResponse([
             'success' => 'true',
