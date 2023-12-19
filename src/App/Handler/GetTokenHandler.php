@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
-use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Exception;
-use Mezzio\Application;
+use App\Helper\TokenActions;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
@@ -72,7 +71,7 @@ class GetTokenHandler implements RequestHandlerInterface
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
 
             if (!$accessToken->hasExpired()) {
-                saveToken([
+                TokenActions::saveToken([
                     'accessToken' => $accessToken->getToken(),
                     'refreshToken' => $accessToken->getRefreshToken(),
                     'expires' => $accessToken->getExpires(),

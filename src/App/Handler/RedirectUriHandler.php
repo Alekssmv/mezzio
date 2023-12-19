@@ -10,6 +10,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Mezzio\Template\TemplateRendererInterface;
+use App\Helper\TokenActions;
 
 class RedirectUriHandler implements RequestHandlerInterface
 {
@@ -25,7 +26,10 @@ class RedirectUriHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            $accessToken = getToken();
+            if (!TokenActions::isTokenExist()) {
+                exit('Access token file not found');
+            }
+            $accessToken = TokenActions::getToken();
             $ownerDetails = $this->apiClient->getOAuthClient()->getResourceOwner($accessToken);
             $data = $ownerDetails->toArray();
         } catch (\Exception $e) {
