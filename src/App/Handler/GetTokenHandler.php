@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
-use Laminas\Diactoros\Response\RedirectResponse;
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -26,7 +26,7 @@ class GetTokenHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         /**
-         * Праметры запроса
+         * Параметры запроса
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
@@ -81,38 +81,8 @@ class GetTokenHandler implements RequestHandlerInterface
         } catch (Exception $e) {
             die((string) $e);
         }
-
-        /**
-         * Отправляем токен на вебхук
-         */
-        try {
-            $apiClient->getOAuthClient()->getHttpClient()->request('POST', $_ENV["AMO_REDIRECT_URI"], [
-                'json' => [
-                    'access_token' => $accessToken->getToken(),
-                    'refresh_token' => $accessToken->getRefreshToken(),
-                    'expires' => $accessToken->getExpires(),
-                    'base_domain' => $apiClient->getAccountBaseDomain(),
-                ],
-            ]);
-        } catch (Exception $e) {
-            die((string) $e);
-        }
-        
-        /**
-         * Полчение ngrok public url туннеля
-         */
-        try {
-            $response = $apiClient->getOAuthClient()->getHttpClient()->request('GET', 'https://api.ngrok.com/tunnels', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $_ENV["NGROK_API_TOKEN"],
-                    'Ngrok-Version' => '2'
-                ]
-            ]);
-            $url = json_decode($response->getBody()->getContents(), true)['tunnels'][0]['public_url'];
-        } catch (Exception $e) {
-            die((string) $e);
-        }
-
-        return new RedirectResponse($url . '/redirect-uri');
+        return new JsonResponse([
+            'success' => 'true',
+        ]);
     }
 }
