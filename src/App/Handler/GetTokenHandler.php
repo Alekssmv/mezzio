@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
+use App\Helper\AmoApi;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -29,14 +30,6 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
-        $accessToken = TokenActions::getToken();
-        
-        /** 
-         * Возвращает редирект, если токен есть и он не истек
-        */
-        if ($accessToken && !$accessToken->hasExpired()) {
-            return new RedirectResponse('/redirect-uri');
-        }
 
         if (isset($params['referer'])) {
             $apiClient->setAccountBaseDomain($params['referer']);
@@ -75,9 +68,10 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         try {
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
-
+            $accountDetails = AmoApi::getAccountInfo($accessToken);
+            $accountId = json_decode($accountDetails)->id;
             if (!$accessToken->hasExpired()) {
-                TokenActions::saveToken([
+                TokenActions::saveToken($accountId, [
                     'accessToken' => $accessToken->getToken(),
                     'refreshToken' => $accessToken->getRefreshToken(),
                     'expires' => $accessToken->getExpires(),
