@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
-use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -20,8 +20,7 @@ class GetTokenHandler implements RequestHandlerInterface
     }
     /**
      * Сохраняет токен в TOKEN_FILE локально
-     * Отправляет токен на вебхук
-     * Возвращает redirect на ngrok public url туннеля на маршрут /redirect-uri
+     * Возвращает redirect ответ на маршрут /redirect-uri
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -81,8 +80,7 @@ class GetTokenHandler implements RequestHandlerInterface
         } catch (Exception $e) {
             die((string) $e);
         }
-        return new JsonResponse([
-            'success' => 'true',
-        ]);
+
+        return new RedirectResponse('/redirect-uri');
     }
 }

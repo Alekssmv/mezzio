@@ -1,4 +1,13 @@
 #!/bin/bash
 
-# Start your server
-php -S 0.0.0.0:82 -t public
+trap "killall ngrok" EXIT
+
+/ngrok http --domain=reasonably-coherent-weasel.ngrok-free.app 8080 &
+
+composer serve
+
+
+
+
+
+
