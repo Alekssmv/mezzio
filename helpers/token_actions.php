@@ -5,9 +5,11 @@ use League\OAuth2\Client\Token\AccessToken;
 define('TOKEN_FILE', DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'token_info.json');
 
 /**
- * @param array $accessToken
+ * Сохраняет токен в TOKEN_FILE
+ * Если переданы не все параметры, то выходит из скрипта
+ * @param array $accessToken * 
  */
-function saveToken($accessToken)
+function saveToken(array $accessToken)
 {
     if (
         isset($accessToken)
@@ -30,9 +32,11 @@ function saveToken($accessToken)
 }
 
 /**
+ * Возвращает токен из TOKEN_FILE
+ * Если файла нет, то выходит из скрипта
  * @return AccessToken
  */
-function getToken()
+function getToken() : AccessToken
 {
     if (!file_exists(TOKEN_FILE)) {
         exit('Access token file not found');

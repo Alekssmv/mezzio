@@ -43,10 +43,6 @@ class ConfigProvider
                 Handler\HomePageHandler::class => Handler\HomePageHandlerFactory::class,
                 Handler\SumHandler::class => Handler\SumHandlerFactory::class,
                 Handler\GetTokenHandler::class => Handler\GetTokenHandlerFactory::class,
-            ],
-            'clients' => [
-                ApiClient::class => ApiClientFactory::class,
-                HttpClient::class => HttpClientFactory::class,
             ]
         ];
     }
