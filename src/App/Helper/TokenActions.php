@@ -40,15 +40,15 @@ class TokenActions
 
     /**
      * Возвращает токен из TOKEN_FILE
-     * Если файла нет, то выходит из скрипта
+     * Если токен некорректный или его нет, то возвращает Null
      * @return AccessToken
      */
-    static function getToken(): AccessToken
+    static function getToken(): AccessToken|null
     {
         if (!file_exists(TOKEN_FILE)) {
-            exit('Access token file not found');
+            return null;
         }
-
+        
         $accessToken = json_decode(file_get_contents(TOKEN_FILE), true);
 
         if (
@@ -65,7 +65,7 @@ class TokenActions
                 'baseDomain' => $accessToken['baseDomain'],
             ]);
         } else {
-            exit('Invalid access token ' . var_export($accessToken, true));
+            return null;
         }
     }
     /**

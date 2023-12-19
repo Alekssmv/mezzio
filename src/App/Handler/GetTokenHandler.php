@@ -19,7 +19,7 @@ class GetTokenHandler implements RequestHandlerInterface
     ) {
     }
     /**
-     * Сохраняет токен в TOKEN_FILE локально
+     * Сохраняет токен в TOKEN_FILE локально, если он еще не получен или истек
      * Возвращает redirect ответ на маршрут /redirect-uri
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -29,7 +29,14 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
-
+        $accessToken = TokenActions::getToken();
+        
+        /** 
+         * Возвращает редирект, если токен есть и он не истек
+        */
+        if ($accessToken && !$accessToken->hasExpired()) {
+            return new RedirectResponse('/redirect-uri');
+        }
 
         if (isset($params['referer'])) {
             $apiClient->setAccountBaseDomain($params['referer']);
