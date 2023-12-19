@@ -87,7 +87,7 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         try {
             $apiClient->getOAuthClient()->getHttpClient()->request('POST', $_ENV["AMO_REDIRECT_URI"], [
-                'token' => [
+                'json' => [
                     'access_token' => $accessToken->getToken(),
                     'refresh_token' => $accessToken->getRefreshToken(),
                     'expires' => $accessToken->getExpires(),
@@ -97,12 +97,12 @@ class GetTokenHandler implements RequestHandlerInterface
         } catch (Exception $e) {
             die((string) $e);
         }
-
+        
         /**
          * Полчение ngrok public url туннеля
          */
         try {
-            $response = $this->$apiClient->getHttpClient()->request('GET', 'https://api.ngrok.com/tunnels', [
+            $response = $apiClient->getOAuthClient()->getHttpClient()->request('GET', 'https://api.ngrok.com/tunnels', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $_ENV["NGROK_API_TOKEN"],
                     'Ngrok-Version' => '2'
