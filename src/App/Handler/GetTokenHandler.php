@@ -25,7 +25,7 @@ class GetTokenHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         /**
-         * Праметры запроса
+         * Параметры запроса
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
