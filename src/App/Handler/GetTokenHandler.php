@@ -80,23 +80,6 @@ class GetTokenHandler implements RequestHandlerInterface
         } catch (Exception $e) {
             die((string) $e);
         }
-
-        /**
-         * Отправляем токен на вебхук
-         */
-        try {
-            $apiClient->getOAuthClient()->getHttpClient()->request('POST', $_ENV["AMO_REDIRECT_URI"], [
-                'json' => [
-                    'access_token' => $accessToken->getToken(),
-                    'refresh_token' => $accessToken->getRefreshToken(),
-                    'expires' => $accessToken->getExpires(),
-                    'base_domain' => $apiClient->getAccountBaseDomain(),
-                ],
-            ]);
-        } catch (Exception $e) {
-            die((string) $e);
-        }
-
         return new JsonResponse([
             'success' => 'true',
         ]);
