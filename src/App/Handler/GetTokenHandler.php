@@ -13,6 +13,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Exception;
 use App\Helper\TokenActions;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
@@ -26,29 +28,29 @@ class GetTokenHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+
         /**
          * Параметры запроса
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
+        $accountId = $_SESSION['accountId'] ?? null;
 
         /**
-         * Получаем id аккаунта из файла связей по id интеграции
-         * Если связи нет, то accessToken = null
+         * Полчаем токен по account_id из сессии, если он есть
          */
-        $accountId = Relations::getRelation($_ENV["AMO_CLIENT_ID"]);
-        if ($accountId !== null) {
+        if ($accountId) {
             $accessToken = TokenActions::getToken($accountId);
         } else {
             $accessToken = null;
         }
 
         /**
-         * Если токен есть и он не истек, то возвращаем redirect ответ на маршрут /redirect-uri
+         * Если токен есть и он не истек, то редиректим на /redirect-uri
          */
         if ($accessToken !== null && !$accessToken->hasExpired()) {
             return new RedirectResponse('/redirect-uri');
-        }
+        } 
 
         if (isset($params['referer'])) {
             $apiClient->setAccountBaseDomain($params['referer']);
@@ -89,10 +91,12 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         try {
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
-            $accountDetails = AmoApi::getAccountInfo($accessToken);
-            $accountId = json_decode($accountDetails)->id;
+            $accountId = $apiClient->setAccessToken($accessToken)->account()->getCurrent()->toArray()['id'];
+            /**
+             * Сохраняем account_id в сессию
+             */
+            $_SESSION['accountId'] = $accountId;
             if (!$accessToken->hasExpired()) {
-                Relations::addRelation($_ENV["AMO_CLIENT_ID"], $accountId);
                 TokenActions::saveToken(
                     $accountId, [
                         'accessToken' => $accessToken->getToken(),

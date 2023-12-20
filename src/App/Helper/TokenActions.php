@@ -6,7 +6,7 @@ namespace App\Helper;
 
 use League\OAuth2\Client\Token\AccessToken;
 
-define('TOKEN_FOLDER', ROOT_DIR . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'tokens' . DIRECTORY_SEPARATOR);
+define('TOKEN_FILE', ROOT_DIR . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'token.json');
 
 /**
  * Класс для работы с токенами
@@ -14,52 +14,51 @@ define('TOKEN_FOLDER', ROOT_DIR . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPAR
 class TokenActions
 {
     /**
-     * Сохраняет токен в TOKEN_FOLDER по $accountId
+     * Сохраняет токен в TOKEN_FILE по $accountId
      * Если переданы не все параметры, то выходит из скрипта
      * @param int $accountId 
      * @param array $accessToken 
      */
     static function saveToken(int $accountId, array $accessToken)
     {
-        if (isset($accessToken)
+        $data = self::getTokens();
+
+        if (
+            isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
             && isset($accessToken['baseDomain'])
         ) {
-            $data = [
+            $data[$accountId] = [
                 'accessToken' => $accessToken['accessToken'],
                 'expires' => $accessToken['expires'],
                 'refreshToken' => $accessToken['refreshToken'],
                 'baseDomain' => $accessToken['baseDomain'],
             ];
-            /**
-             * Создает директорию, если ее нет
-             */
-            if (!is_dir(TOKEN_FOLDER)) {
-                mkdir(TOKEN_FOLDER, 0777, true);
-            }
-            file_put_contents(TOKEN_FOLDER . $accountId . '.json', json_encode($data));
+            file_put_contents(TOKEN_FILE, json_encode($data));
         } else {
             exit('Invalid access token ' . var_export($accessToken, true));
         }
     }
 
     /**
-     * Возвращает токен из TOKEN_FOLDER по $accountId
+     * Возвращает токен из TOKEN_FILE по $accountId
      * Если токен некорректный или его нет, то возвращает Null
      * @param int $accountId
      * @return AccessToken|null
      */
     static function getToken(int $accountId): AccessToken|null
     {
-        if (!file_exists(TOKEN_FOLDER . $accountId . '.json')) {
+        if (!file_exists(TOKEN_FILE)) {
             return null;
         }
 
-        $accessToken = json_decode(file_get_contents(TOKEN_FOLDER . $accountId . '.json'), true);
+        $data = json_decode(file_get_contents(TOKEN_FILE), true);
+        $accessToken = $data[$accountId] ?? null;
 
-        if (isset($accessToken)
+        if (
+            isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
@@ -78,15 +77,43 @@ class TokenActions
         }
     }
     /**
-     * Проверяет существование файла TOKEN_FOLDER по $accountId
+     * Проверяет существование файла TOKEN_FILE по $accountId
      * @param int $accountId
      * @return bool
      */
     static function isTokenExist(int $accountId): bool
     {
-        if (!file_exists(TOKEN_FOLDER . $accountId . '.json')) {
+        if (!file_exists(TOKEN_FILE)) {
             return false;
         }
-        return true;
+
+        $data = json_decode(file_get_contents(TOKEN_FILE), true);
+        $accessToken = $data[$accountId] ?? null;
+
+        if (
+            isset($accessToken)
+            && isset($accessToken['accessToken'])
+            && isset($accessToken['refreshToken'])
+            && isset($accessToken['expires'])
+            && isset($accessToken['baseDomain'])
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    /**
+     * Возвращает все токены из TOKEN_FILE
+     * @return array
+     */
+    static function getTokens(): array
+    {
+        if (!file_exists(TOKEN_FILE)) {
+            return [];
+        }
+
+        $data = json_decode(file_get_contents(TOKEN_FILE), true);
+
+        return $data;
     }
 }
