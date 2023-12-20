@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
-use App\Helper\AmoApi;
-use App\Helper\Relations;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Exception;
 use App\Helper\TokenActions;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 
 class GetTokenHandler implements RequestHandlerInterface
 {

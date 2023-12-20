@@ -23,8 +23,7 @@ class TokenActions
     {
         $data = self::getTokens();
 
-        if (
-            isset($accessToken)
+        if (isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
@@ -57,8 +56,7 @@ class TokenActions
         $data = json_decode(file_get_contents(TOKEN_FILE), true);
         $accessToken = $data[$accountId] ?? null;
 
-        if (
-            isset($accessToken)
+        if (isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
@@ -90,8 +88,7 @@ class TokenActions
         $data = json_decode(file_get_contents(TOKEN_FILE), true);
         $accessToken = $data[$accountId] ?? null;
 
-        if (
-            isset($accessToken)
+        if (isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
