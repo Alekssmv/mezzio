@@ -6,8 +6,11 @@ namespace App\Helper;
 
 use League\OAuth2\Client\Token\AccessToken;
 
-define('TOKEN_FOLDER', DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'tokens' . DIRECTORY_SEPARATOR);
+define('TOKEN_FOLDER', ROOT_DIR . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'tokens' . DIRECTORY_SEPARATOR);
 
+/**
+ * Класс для работы с токенами
+ */
 class TokenActions
 {
     /**
@@ -51,11 +54,11 @@ class TokenActions
      */
     static function getToken(int $accountId): AccessToken|null
     {
-        if (!file_exists(TOKEN_FOLDER)) {
+        if (!file_exists(TOKEN_FOLDER . $accountId . '.json')) {
             return null;
         }
 
-        $accessToken = json_decode(file_get_contents(TOKEN_FOLDER), true);
+        $accessToken = json_decode(file_get_contents(TOKEN_FOLDER . $accountId . '.json'), true);
 
         if (
             isset($accessToken)
@@ -81,7 +84,8 @@ class TokenActions
      */
     static function isTokenExist(int $accountId): bool
     {
-        if (!file_exists(TOKEN_FOLDER . $accountId . '.json')
+        if (
+            !file_exists(TOKEN_FOLDER . $accountId . '.json')
         ) {
             return false;
         }

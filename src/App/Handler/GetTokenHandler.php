@@ -6,6 +6,7 @@ namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
 use App\Helper\AmoApi;
+use App\Helper\Relations;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,11 +26,30 @@ class GetTokenHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        dd($_ENV["AMO_CLIENT_ID"]);
         /**
          * Параметры запроса
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
+
+        /**
+         * Получаем id аккаунта из файла связей по id интеграции
+         * Если связи нет, то accessToken = null
+         */
+        $accountId = Relations::getRelation($_ENV["AMO_CLIENT_ID"]);
+        if ($accountId !== null) {
+            $accessToken = TokenActions::getToken($accountId);
+        } else {
+            $accessToken = null;
+        }
+
+        /**
+         * Если токен есть и он не истек, то возвращаем redirect ответ на маршрут /redirect-uri
+         */
+        if ($accessToken !== null && !$accessToken->hasExpired()) {
+            return new RedirectResponse('/redirect-uri');
+        }
 
         if (isset($params['referer'])) {
             $apiClient->setAccountBaseDomain($params['referer']);
@@ -71,6 +91,7 @@ class GetTokenHandler implements RequestHandlerInterface
             $accountDetails = AmoApi::getAccountInfo($accessToken);
             $accountId = json_decode($accountDetails)->id;
             if (!$accessToken->hasExpired()) {
+                Relations::addRelation($_ENV["AMO_CLIENT_ID"], $accountId);
                 TokenActions::saveToken($accountId, [
                     'accessToken' => $accessToken->getToken(),
                     'refreshToken' => $accessToken->getRefreshToken(),

@@ -11,6 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Mezzio\Template\TemplateRendererInterface;
 use App\Helper\TokenActions;
+use App\Helper\Relations;
 
 class RedirectUriHandler implements RequestHandlerInterface
 {
@@ -26,10 +27,10 @@ class RedirectUriHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            if (!TokenActions::isTokenExist()) {
+            if (!TokenActions::isTokenExist(Relations::getRelation($_ENV["AMO_CLIENT_ID"]))) {
                 exit('Access token file not found');
             }
-            $accessToken = TokenActions::getToken();
+            $accessToken = TokenActions::getToken(Relations::getRelation($_ENV["AMO_CLIENT_ID"]));
             $ownerDetails = $this->apiClient->getOAuthClient()->getResourceOwner($accessToken);
             $data = $ownerDetails->toArray();
         } catch (\Exception $e) {

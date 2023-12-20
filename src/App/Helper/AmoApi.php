@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Helper;
 use League\OAuth2\Client\Token\AccessToken;
 
+/**
+ * Класс для работы с API AmoCRM
+ */
 class AmoApi
 {
     /**
