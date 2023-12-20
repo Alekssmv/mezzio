@@ -11,6 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Mezzio\Template\TemplateRendererInterface;
 use App\Helper\TokenActions;
+use Exception;
 
 class RedirectUriHandler implements RequestHandlerInterface
 {
@@ -25,14 +26,15 @@ class RedirectUriHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $params = $request->getQueryParams();
         try {
-            if (!TokenActions::isTokenExist($_SESSION['accountId'])) {
+            if (!TokenActions::isTokenExist((int) $params['account_id'])) {
                 exit('Access token file not found');
             }
-            $accessToken = TokenActions::getToken($_SESSION['accountId']);
+            $accessToken = TokenActions::getToken((int) $params['account_id']);
             $ownerDetails = $this->apiClient->getOAuthClient()->getResourceOwner($accessToken);
             $data = $ownerDetails->toArray();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             echo $e->getMessage();
         }
         return new HtmlResponse(

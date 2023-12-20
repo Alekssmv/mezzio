@@ -20,7 +20,7 @@ class GetTokenHandler implements RequestHandlerInterface
     }
     /**
      * Сохраняет токен в TOKEN_FILE локально, если он еще не получен или истек
-     * Возвращает redirect ответ на маршрут /redirect-uri
+     * Возвращает redirect ответ на маршрут /redirect-uri с параметром account_id
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -30,23 +30,22 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
-        $accountId = $_SESSION['accountId'] ?? null;
 
         /**
-         * Полчаем токен по account_id из сессии, если он есть
+         * Полчаем токен по url параметру account_id
          */
-        if ($accountId) {
-            $accessToken = TokenActions::getToken($accountId);
+        if (isset($params['account_id'])) {
+            $accessToken = TokenActions::getToken((int) $params['account_id']);
         } else {
             $accessToken = null;
         }
-
+        
         /**
-         * Если токен есть и он не истек, то редиректим на /redirect-uri
+         * Если токен есть и он не истек, то редиректим на /redirect-uri с параметром account_id
          */
         if ($accessToken !== null && !$accessToken->hasExpired()) {
-            return new RedirectResponse('/redirect-uri');
-        } 
+            return new RedirectResponse('/redirect-uri' . '?account_id=' . $params['account_id']);
+        }
 
         if (isset($params['referer'])) {
             $apiClient->setAccountBaseDomain($params['referer']);
@@ -88,10 +87,6 @@ class GetTokenHandler implements RequestHandlerInterface
         try {
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
             $accountId = $apiClient->setAccessToken($accessToken)->account()->getCurrent()->toArray()['id'];
-            /**
-             * Сохраняем account_id в сессию
-             */
-            $_SESSION['accountId'] = $accountId;
             if (!$accessToken->hasExpired()) {
                 TokenActions::saveToken(
                     $accountId, [
@@ -106,6 +101,6 @@ class GetTokenHandler implements RequestHandlerInterface
             die((string) $e);
         }
 
-        return new RedirectResponse('/redirect-uri');
+        return new RedirectResponse('/redirect-uri' . '?account_id=' . $accountId);
     }
 }
