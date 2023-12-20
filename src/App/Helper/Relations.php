@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace App\Helper;
+
 use SebastianBergmann\Type\VoidType;
 
 
@@ -41,7 +42,7 @@ class Relations
         self::createRelationsFile();
 
         $relations = file_get_contents(RELATIONS_FILE);
-        
+
         if (!$relations) {
             return null;
         }
@@ -70,7 +71,7 @@ class Relations
         if (!$relations) {
             return null;
         }
-       ;
+        ;
         if (!isset($relations[$clientId])) {
             return null;
         }

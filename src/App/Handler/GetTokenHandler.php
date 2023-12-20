@@ -70,10 +70,12 @@ class GetTokenHandler implements RequestHandlerInterface
                 );
                 die;
             } else {
-                $authorizationUrl = $apiClient->getOAuthClient()->getAuthorizeUrl([
-                    'state' => $state,
-                    'mode' => 'post_message',
-                ]);
+                $authorizationUrl = $apiClient->getOAuthClient()->getAuthorizeUrl(
+                    [
+                        'state' => $state,
+                        'mode' => 'post_message',
+                    ]
+                );
                 header('Location: ' . $authorizationUrl);
                 die;
             }
@@ -91,12 +93,14 @@ class GetTokenHandler implements RequestHandlerInterface
             $accountId = json_decode($accountDetails)->id;
             if (!$accessToken->hasExpired()) {
                 Relations::addRelation($_ENV["AMO_CLIENT_ID"], $accountId);
-                TokenActions::saveToken($accountId, [
-                    'accessToken' => $accessToken->getToken(),
-                    'refreshToken' => $accessToken->getRefreshToken(),
-                    'expires' => $accessToken->getExpires(),
-                    'baseDomain' => $apiClient->getAccountBaseDomain(),
-                ]);
+                TokenActions::saveToken(
+                    $accountId, [
+                        'accessToken' => $accessToken->getToken(),
+                        'refreshToken' => $accessToken->getRefreshToken(),
+                        'expires' => $accessToken->getExpires(),
+                        'baseDomain' => $apiClient->getAccountBaseDomain(),
+                    ]
+                );
             }
         } catch (Exception $e) {
             die((string) $e);

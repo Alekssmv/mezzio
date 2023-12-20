@@ -21,8 +21,7 @@ class TokenActions
      */
     static function saveToken(int $accountId, array $accessToken)
     {
-        if (
-            isset($accessToken)
+        if (isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
@@ -60,19 +59,20 @@ class TokenActions
 
         $accessToken = json_decode(file_get_contents(TOKEN_FOLDER . $accountId . '.json'), true);
 
-        if (
-            isset($accessToken)
+        if (isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
             && isset($accessToken['baseDomain'])
         ) {
-            return new AccessToken([
-                'access_token' => $accessToken['accessToken'],
-                'refresh_token' => $accessToken['refreshToken'],
-                'expires' => $accessToken['expires'],
-                'baseDomain' => $accessToken['baseDomain'],
-            ]);
+            return new AccessToken(
+                [
+                    'access_token' => $accessToken['accessToken'],
+                    'refresh_token' => $accessToken['refreshToken'],
+                    'expires' => $accessToken['expires'],
+                    'baseDomain' => $accessToken['baseDomain'],
+                ]
+            );
         } else {
             return null;
         }
@@ -84,9 +84,7 @@ class TokenActions
      */
     static function isTokenExist(int $accountId): bool
     {
-        if (
-            !file_exists(TOKEN_FOLDER . $accountId . '.json')
-        ) {
+        if (!file_exists(TOKEN_FOLDER . $accountId . '.json')) {
             return false;
         }
         return true;
