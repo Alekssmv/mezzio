@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Handler;
+namespace App\Factory;
 
 use AmoCRM\Client\AmoCRMApiClient;
 use Psr\Container\ContainerInterface;

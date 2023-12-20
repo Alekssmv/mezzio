@@ -26,7 +26,6 @@ class GetTokenHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        dd($_ENV["AMO_CLIENT_ID"]);
         /**
          * Параметры запроса
          */

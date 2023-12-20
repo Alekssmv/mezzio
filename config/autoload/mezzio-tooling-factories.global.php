@@ -13,14 +13,10 @@ declare(strict_types=1);
 return [
     'dependencies' => [
         'factories' => [
-            App\Client\ApiClient::class => App\Client\ApiClientFactory::class,
-            App\Client\HttpClient::class => App\Client\HttpClientFactory::class,
-            App\Handle\HttpClient::class => App\Handle\HttpClientFactory::class,
-            App\Handler\ApiClient::class => App\Handler\ApiClientFactory::class,
-            App\Handler\GetTokenHandler::class => App\Handler\GetTokenHandlerFactory::class,
-            App\Handler\HttpClient::class => App\Handler\HttpClientFactory::class,
-            App\Handler\RedirectUriHandler::class => App\Handler\RedirectUriHandlerFactory::class,
-            App\Handler\SumHandler::class => App\Handler\SumHandlerFactory::class,
+            Handler\HomePageHandler::class => Factory\HomePageHandlerFactory::class,
+            Handler\SumHandler::class => Factory\SumHandlerFactory::class,
+            Handler\GetTokenHandler::class => Factory\GetTokenHandlerFactory::class,
+            Handler\RedirectUriHandler::class => Factory\RedirectUriHandlerFactory::class,
         ],
     ],
 ];
