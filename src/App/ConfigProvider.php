@@ -38,12 +38,16 @@ class ConfigProvider
         return [
             'invokables' => [
                 Handler\PingHandler::class => Handler\PingHandler::class,
+               
             ],
             'factories' => [
+                Factory\AmoCRMApiClientFactory::class => Factory\AmoCRMApiClientFactory::class,
                 Handler\HomePageHandler::class => Factory\HomePageHandlerFactory::class,
                 Handler\SumHandler::class => Factory\SumHandlerFactory::class,
                 Handler\GetTokenHandler::class => Factory\GetTokenHandlerFactory::class,
                 Handler\RedirectUriHandler::class => Factory\RedirectUriHandlerFactory::class,
+                Handler\GetContactsHandler::class => Factory\GetContactsHandlerFactory::class,
+                
             ]
         ];
     }

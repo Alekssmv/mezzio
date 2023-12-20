@@ -15,11 +15,7 @@ class RedirectUriHandlerFactory
     {
         return new RedirectUriHandler(
             $container->get(TemplateRendererInterface::class),
-            new AmoCRMApiClient(
-                $_ENV["AMO_CLIENT_ID"],
-                $_ENV["AMO_CLIENT_SECRET"],
-                $_ENV["AMO_REDIRECT_URI"],
-            )
+            $container->get(AmoCRMApiClientFactory::class),
         );
     }
 }

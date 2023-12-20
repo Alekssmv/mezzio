@@ -12,11 +12,6 @@ class GetTokenHandlerFactory
 {
     public function __invoke(ContainerInterface $container) : GetTokenHandler
     { 
-        $apiClient = new AmoCRMApiClient(
-            $_ENV["AMO_CLIENT_ID"],
-            $_ENV["AMO_CLIENT_SECRET"],
-            $_ENV["AMO_REDIRECT_URI"],
-        );
-        return new GetTokenHandler($apiClient);
+        return new GetTokenHandler($container->get(AmoCRMApiClientFactory::class));
     }
 }

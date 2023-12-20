@@ -17,6 +17,7 @@ return [
             Handler\SumHandler::class => Factory\SumHandlerFactory::class,
             Handler\GetTokenHandler::class => Factory\GetTokenHandlerFactory::class,
             Handler\RedirectUriHandler::class => Factory\RedirectUriHandlerFactory::class,
+            Handler\GetContactsHandler::class => Factory\GetContactsHandlerFactory::class,
         ],
     ],
 ];

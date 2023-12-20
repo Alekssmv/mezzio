@@ -19,8 +19,13 @@ class TokenActions
      * @param int $accountId 
      * @param array $accessToken 
      */
-    static function saveToken(int $accountId, array $accessToken)
+    static function saveToken(array|int $accountId, array $accessToken)
     {
+        if (is_string($accountId)) {
+            dd('test');
+            $accountId = (int)$accountId;
+        }
+
         $data = self::getTokens();
         if (isset($accessToken)
             && isset($accessToken['accessToken'])
@@ -42,8 +47,15 @@ class TokenActions
      * @param int $accountId
      * @return AccessToken|null
      */
-    static function getToken(int $accountId): AccessToken|null
+    static function getToken(int|string $accountId): AccessToken|null
     {
+        /*
+        * Если передана строка, то преобразуем ее в число
+        */
+        if (is_string($accountId)) {
+            $accountId = (int)$accountId;
+        }
+
         if (!file_exists(TOKEN_FILE)) {
             return null;
         }
