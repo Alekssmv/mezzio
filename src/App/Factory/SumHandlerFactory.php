@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Handler;
+namespace App\Factory;
 
-use Mezzio\Template\TemplateRendererInterface;
 use Psr\Container\ContainerInterface;
+use App\Handler\SumHandler;
 
 class SumHandlerFactory
 {

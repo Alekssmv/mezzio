@@ -11,11 +11,6 @@ chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 require 'config/bootstrap.php';
 
-use Dotenv\Dotenv;
-
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-$dotenv->load();
-
 session_start();
 
 /**

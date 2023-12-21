@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Handler;
+namespace App\Factory;
 
 use Mezzio\Router\RouterInterface;
 use Mezzio\Template\TemplateRendererInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use App\Handler\HomePageHandler;
 
 use function assert;
 

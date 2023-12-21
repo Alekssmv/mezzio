@@ -38,8 +38,9 @@ use Psr\Container\ContainerInterface;
  */
 
 return static function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
-    $apiPrefix = '/api/v1';
     $app->get('/', App\Handler\HomePageHandler::class, 'home');
+    $app->get('/redirect-uri', App\Handler\RedirectUriHandler::class, 'redirect-uri');
+    $apiPrefix = '/api/v1';
     $app->get($apiPrefix . '/ping', App\Handler\PingHandler::class, 'api.ping');
     $app->get($apiPrefix . '/sum/{a:\d+}/{b:\d+}', App\Handler\SumHandler::class, 'api.sum');
     $app->get($apiPrefix . '/token', App\Handler\GetTokenHandler::class, 'api.token');

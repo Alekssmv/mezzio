@@ -40,9 +40,10 @@ class ConfigProvider
                 Handler\PingHandler::class => Handler\PingHandler::class,
             ],
             'factories' => [
-                Handler\HomePageHandler::class => Handler\HomePageHandlerFactory::class,
-                Handler\SumHandler::class => Handler\SumHandlerFactory::class,
-                Handler\GetTokenHandler::class => Handler\GetTokenHandlerFactory::class,
+                Handler\HomePageHandler::class => Factory\HomePageHandlerFactory::class,
+                Handler\SumHandler::class => Factory\SumHandlerFactory::class,
+                Handler\GetTokenHandler::class => Factory\GetTokenHandlerFactory::class,
+                Handler\RedirectUriHandler::class => Factory\RedirectUriHandlerFactory::class,
             ]
         ];
     }
