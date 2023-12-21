@@ -7,6 +7,9 @@ namespace App\Factory;
 use AmoCRM\Client\AmoCRMApiClient;
 use Psr\Container\ContainerInterface;
 
+/**
+ * Фабрика для создания экземпляра клиента для работы с API AmoCRM
+ */
 class AmoCRMApiClientFactory
 {
     public function __invoke(ContainerInterface $container) : AmoCRMApiClient
