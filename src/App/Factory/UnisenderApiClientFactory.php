@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Factory;
 
-use AmoCRM\Client\AmoCRMApiClient;
 use Psr\Container\ContainerInterface;
 use Unisender\ApiWrapper\UnisenderApi;
 

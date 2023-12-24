@@ -9,7 +9,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Unisender\ApiWrapper\UnisenderApi;
-use AmoCRM\Client\AmoCRMApiClient;
 
 /*
 * Маршрут для получения созданного мной контакта в Unisender

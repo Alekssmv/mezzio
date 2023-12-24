@@ -38,15 +38,15 @@ class GetContactsHandler implements RequestHandlerInterface
 
         try {
             if (!isset($params['account_id'])) {
-                return new JsonResponse(['error' => 'account_id is required']);
+                throw new Exception('account_id is not set');
             }
 
             $accessToken = TokenActions::getToken((int) $params['account_id']);
             if ($accessToken === null) {
-                return new JsonResponse(['error' => 'token not found']);
+                throw new Exception('token not found');
             }
             if ($accessToken->hasExpired()) {
-                return new JsonResponse(['error' => 'token expired']);
+                throw new Exception('token expired');
             }
 
             $baseDomain = $accessToken->getValues()['baseDomain'];
@@ -54,7 +54,11 @@ class GetContactsHandler implements RequestHandlerInterface
             $contacts = $apiClient->contacts()->get();
 
         } catch (Exception $e) {
-            return new JsonResponse(['error' => $e->getMessage()]);
+            throw new Exception($e->getMessage());
+        }
+
+        if (empty($contacts)) {
+            throw new Exception('contacts not found');
         }
 
         return new JsonResponse($contacts);
