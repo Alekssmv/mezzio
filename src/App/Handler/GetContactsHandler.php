@@ -24,8 +24,11 @@ use Exception;
  */
 class GetContactsHandler implements RequestHandlerInterface
 {
-    public function __construct(private AmoCRMApiClient $apiClient
+    private AmoCRMApiClient $apiClient;
+    public function __construct(
+        AmoCRMApiClient $apiClient
     ) {
+        $this->apiClient = $apiClient;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

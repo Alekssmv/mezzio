@@ -10,9 +10,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
 use function json_decode;
-use function property_exists;
-
-use const JSON_THROW_ON_ERROR;
 
 class PingHandlerTest extends TestCase
 {
@@ -23,9 +20,9 @@ class PingHandlerTest extends TestCase
             $this->createMock(ServerRequestInterface::class)
         );
 
-        $json = json_decode((string) $response->getBody(), null, 512, JSON_THROW_ON_ERROR);
+        $json = json_decode((string) $response->getBody());
 
         self::assertInstanceOf(JsonResponse::class, $response);
-        self::assertTrue(property_exists($json, 'ack') && $json->ack !== null);
+        self::assertTrue(isset($json->ack));
     }
 }

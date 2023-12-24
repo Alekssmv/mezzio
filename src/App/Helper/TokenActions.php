@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Helper;
 
 use League\OAuth2\Client\Token\AccessToken;
+use Exception;
 
 define('TOKEN_FILE', ROOT_DIR . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'token.json');
 
@@ -19,13 +20,8 @@ class TokenActions
      * @param int $accountId 
      * @param array $accessToken 
      */
-    static function saveToken(array|int $accountId, array $accessToken)
+    static function saveToken(int $accountId, array $accessToken)
     {
-        if (is_string($accountId)) {
-            dd('test');
-            $accountId = (int)$accountId;
-        }
-
         $data = self::getTokens();
         if (isset($accessToken)
             && isset($accessToken['accessToken'])
@@ -47,17 +43,10 @@ class TokenActions
      * @param int $accountId
      * @return AccessToken|null
      */
-    static function getToken(int|string $accountId): AccessToken|null
+    static function getToken(int $accountId): AccessToken
     {
-        /*
-        * Если передана строка, то преобразуем ее в число
-        */
-        if (is_string($accountId)) {
-            $accountId = (int)$accountId;
-        }
-
         if (!file_exists(TOKEN_FILE)) {
-            return null;
+            throw new Exception('Access token file not found');
         }
 
         $data = json_decode(file_get_contents(TOKEN_FILE), true);
@@ -78,7 +67,7 @@ class TokenActions
                 ]
             );
         } else {
-            return null;
+            throw new Exception('Invalid access token ' . var_export($accessToken, true));
         }
     }
     /**

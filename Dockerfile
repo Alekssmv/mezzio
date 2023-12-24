@@ -1,17 +1,15 @@
-FROM cfg_ubuntu
-
-WORKDIR /app
-
-ARG AUTH_TOKEN
-
-COPY . /app
-
-RUN composer install
-
-RUN /ngrok config add-authtoken $AUTH_TOKEN
-
-RUN chmod +x /app/scripts/start.sh
-
-# To build this image, run:
-# where AUTH_TOKEN is your ngrok auth token
-# sudo docker build --build-arg AUTH_TOKEN= -t your_image .
+# Образ php + fpm + alpine из внешнего репозитория
+FROM php:7.4.23-fpm-alpine3.13 as base
+ 
+# Задаем расположение рабочей директории
+ENV WORK_DIR /var/www/application
+ 
+ 
+FROM base
+# Указываем, что текущая папка проекта копируется в рабочую директорию контейнера https://docs.docker.com/engine/reference/builder/#copy
+COPY . ${WORK_DIR}
+ 
+ 
+# Expose port 9000 and start php-fpm server
+EXPOSE 9000
+CMD ["php-fpm"]

@@ -14,9 +14,11 @@ use App\Helper\TokenActions;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
+    private AmoCRMApiClient $apiClient;
     public function __construct(
-        private AmoCRMApiClient $apiClient
+        AmoCRMApiClient $apiClient
     ) {
+        $this->apiClient = $apiClient;
     }
     /**
      * Сохраняет токен в TOKEN_FILE локально, если он еще не получен или истек
@@ -55,7 +57,7 @@ class GetTokenHandler implements RequestHandlerInterface
             $state = bin2hex(random_bytes(16));
             $_SESSION['oauth2state'] = $state;
             if (isset($params['button'])) {
-                echo $apiClient->getOAuthClient()->getOAuthButton(
+                $test = $apiClient->getOAuthClient()->getOAuthButton(
                     [
                         'title' => 'Установить интеграцию',
                         'compact' => true,
@@ -65,6 +67,7 @@ class GetTokenHandler implements RequestHandlerInterface
                         'state' => $state,
                     ]
                 );
+                echo $test;
                 die;
             } else {
                 $authorizationUrl = $apiClient->getOAuthClient()->getAuthorizeUrl(

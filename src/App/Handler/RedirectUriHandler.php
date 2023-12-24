@@ -15,10 +15,14 @@ use Exception;
 
 class RedirectUriHandler implements RequestHandlerInterface
 {
+    private AmoCRMApiClient $apiClient;
+    private TemplateRendererInterface $templateRenderer;
     public function __construct(
-        private TemplateRendererInterface $renderer,
-        private AmoCRMApiClient $apiClient,
+        TemplateRendererInterface $renderer,
+        AmoCRMApiClient $apiClient
     ) {
+        $this->apiClient = $apiClient;
+        $this->renderer = $renderer;
     }
     /**
      * Берет токен из файла TOKEN_FILE

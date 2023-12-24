@@ -24,11 +24,17 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class HomePageHandler implements RequestHandlerInterface
 {
+    private string $containerName;
+    private $template;
+    private RouterInterface $router;
     public function __construct(
-        private string $containerName,
-        private RouterInterface $router,
-        private ?TemplateRendererInterface $template = null
+        string $containerName,
+        RouterInterface $router,
+        ?TemplateRendererInterface $template = null
     ) {
+        $this->containerName = $containerName;
+        $this->router = $router;
+        $this->template = $template;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface

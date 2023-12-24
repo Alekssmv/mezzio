@@ -36,7 +36,6 @@ use Psr\Container\ContainerInterface;
  *     'contact'
  * );
  */
-
 return static function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
     $app->get('/', App\Handler\HomePageHandler::class, 'home');
     $app->get('/redirect-uri', App\Handler\RedirectUriHandler::class, 'redirect-uri');

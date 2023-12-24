@@ -24,6 +24,6 @@ class HomePageHandlerFactory
             : null;
         assert($template instanceof TemplateRendererInterface || null === $template);
 
-        return new HomePageHandler($container::class, $router, $template);
+        return new HomePageHandler(get_class($container), $router, $template);
     }
 }

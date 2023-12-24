@@ -2,22 +2,6 @@
 
 [![Build Status](https://github.com/mezzio/mezzio-skeleton/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/mezzio/mezzio-skeleton/actions/workflows/continuous-integration.yml)
 
-> ## 🇷🇺 Русским гражданам
-> 
-> Мы, участники Laminas, родились и живем в разных странах. У многих из нас есть друзья, родственники и коллеги как в России, так и в Украине. Некоторые из нас родились в России. Некоторые из нас живут в России. У некоторых бабушки и дедушки сражались с фашистами во Второй мировой войне. Здесь никто не поддерживает фашизм.
-> 
-> У одного из нас есть украинская родственница, которая спаслась из дома вместе с сыном. Поезд задержался из-за бомбежки на дороге впереди. У нас есть друзья, которые прячутся в бомбоубежищах. Мы с тревогой ждем весточки от них после воздушных налетов, которые беспорядочно наносят удары и попадают по больницам, школам, детским садам и домам. Мы не берем это из каких-либо СМИ. Мы наблюдаем это напрямую.
-> 
-> Вы доверяете нам достаточно, чтоб использовать наши программы, и мы просим вас довериться нам вновь. Мы нуждаемся в помощи. Выходите и протестуйте против этой бесполезной войны. Остановите кровопролитие. Скажите "Нет войне!"
-> 
-> ## 🇺🇸 To Citizens of Russia
-> 
-> We at Laminas come from all over the world. Many of us have friends, family and colleagues in both Russia and Ukraine. Some of us were born in Russia. Some of us currently live in Russia. Some have grandparents who fought Nazis in World War II. Nobody here supports fascism.
-> 
-> One team member has a Ukrainian relative who fled her home with her son. The train was delayed due to bombing on the road ahead. We have friends who are hiding in bomb shelters. We anxiously follow up on them after the air raids, which indiscriminately fire at hospitals, schools, kindergartens and houses. We're not taking this from any media. These are our actual experiences.
-> 
-> You trust us enough to use our software. We ask that you trust us to say the truth on this. We need your help. Go out and protest this unnecessary war. Stop the bloodshed. Say "stop the war!"
-
 *Begin developing PSR-15 middleware applications in seconds!*
 
 [mezzio](https://github.com/mezzio/mezzio) builds on
@@ -49,10 +33,39 @@ After choosing and installing the packages you want, go to the
 `<project-path>` and start PHP's built-in web server to verify installation:
 
 ```bash
-$ composer serve
+$ composer run --timeout=0 serve
 ```
 
 You can then browse to http://localhost:8080.
+
+> ### Linux users
+>
+> On PHP versions prior to 7.1.14 and 7.2.2, this command might not work as
+> expected due to a bug in PHP that only affects linux environments. In such
+> scenarios, you will need to start the [built-in web
+> server](http://php.net/manual/en/features.commandline.webserver.php) yourself,
+> using the following command:
+>
+> ```bash
+> $ php -S 0.0.0.0:8080 -t public/ public/index.php
+> ```
+
+> ### Setting a timeout
+>
+> Composer commands time out after 300 seconds (5 minutes). On Linux-based
+> systems, the `php -S` command that `composer serve` spawns continues running
+> as a background process, but on other systems halts when the timeout occurs.
+>
+> As such, we recommend running the `serve` script using a timeout. This can
+> be done by using `composer run` to execute the `serve` script, with a
+> `--timeout` option. When set to `0`, as in the previous example, no timeout
+> will be used, and it will run until you cancel the process (usually via
+> `Ctrl-C`). Alternately, you can specify a finite timeout; as an example,
+> the following will extend the timeout to a full day:
+>
+> ```bash
+> $ composer run --timeout=86400 serve
+> ```
 
 ## Installing alternative packages
 

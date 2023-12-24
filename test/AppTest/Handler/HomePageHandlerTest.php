@@ -14,6 +14,8 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+use function get_class;
+
 class HomePageHandlerTest extends TestCase
 {
     /** @var ContainerInterface&MockObject */
@@ -31,7 +33,7 @@ class HomePageHandlerTest extends TestCase
     public function testReturnsJsonResponseWhenNoTemplateRendererProvided(): void
     {
         $homePage = new HomePageHandler(
-            $this->container::class,
+            get_class($this->container),
             $this->router,
             null
         );
@@ -52,7 +54,7 @@ class HomePageHandlerTest extends TestCase
             ->willReturn('');
 
         $homePage = new HomePageHandler(
-            $this->container::class,
+            get_class($this->container),
             $this->router,
             $renderer
         );
