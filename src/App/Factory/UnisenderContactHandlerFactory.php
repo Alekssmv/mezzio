@@ -13,8 +13,7 @@ class UnisenderContactHandlerFactory
     public function __invoke(ContainerInterface $container): UnisenderContactHandler
     {
         return new UnisenderContactHandler(
-            $container->get(UnisenderApiClientFactory::class),
-            $container->get(AmoCRMApiClientFactory::class),
+            $container->get(UnisenderApiClientFactory::class)
         );
     }
 }
