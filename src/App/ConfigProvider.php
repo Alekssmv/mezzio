@@ -42,12 +42,13 @@ class ConfigProvider
             ],
             'factories' => [
                 Factory\AmoCRMApiClientFactory::class => Factory\AmoCRMApiClientFactory::class,
+                Factory\UnisenderApiClientFactory::class => Factory\UnisenderApiClientFactory::class,
                 Handler\HomePageHandler::class => Factory\HomePageHandlerFactory::class,
                 Handler\SumHandler::class => Factory\SumHandlerFactory::class,
                 Handler\GetTokenHandler::class => Factory\GetTokenHandlerFactory::class,
                 Handler\RedirectUriHandler::class => Factory\RedirectUriHandlerFactory::class,
                 Handler\GetContactsHandler::class => Factory\GetContactsHandlerFactory::class,
-                
+                Handler\UnisenderContactHandler::class => Factory\UnisenderContactHandlerFactory::class,
             ]
         ];
     }
