@@ -41,7 +41,7 @@ class GetContactsHandler implements RequestHandlerInterface
                 return new JsonResponse(['error' => 'account_id is required']);
             }
 
-            $accessToken = TokenActions::getToken($params['account_id']);
+            $accessToken = TokenActions::getToken((int) $params['account_id']);
             if ($accessToken === null) {
                 return new JsonResponse(['error' => 'token not found']);
             }
