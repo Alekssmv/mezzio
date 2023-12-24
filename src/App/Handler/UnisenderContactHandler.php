@@ -11,24 +11,28 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Unisender\ApiWrapper\UnisenderApi;
 use AmoCRM\Client\AmoCRMApiClient;
 
+/*
+* Маршрут для получения созданного мной контакта в Unisender
+* Возвращает контакт в формате JSON
+*/
 class UnisenderContactHandler implements RequestHandlerInterface
 {
+    /**
+     * Переменная для работы с API Unisender
+     * @var UnisenderApi
+     */
     private UnisenderApi $unisenderApiClient;
-    private AmoCRMApiClient $amoCRMApiClient;
     public function __construct(
-        UnisenderApi $unisenderApiClient,
-        AmoCRMApiClient $amoCRMApiClient
+        UnisenderApi $unisenderApiClient
     ) {
         $this->unisenderApiClient = $unisenderApiClient;
-        $this->amoCRMApiClient = $amoCRMApiClient;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $amoCRMApiClient = $this->amoCRMApiClient;
         $unisenderApiClient = $this->unisenderApiClient;
 
         $contact = $unisenderApiClient->getContact(['email' => 'test@test.com']);
-        dd($contact);
+        return new JsonResponse($contact);
     }
 }
