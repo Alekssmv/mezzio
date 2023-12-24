@@ -28,3 +28,12 @@ services:
         ports:
             - "81:81"
             - "443:443"
+
+    # Ngrok Service
+    ngrok:
+        image: wernight/ngrok
+        restart: always
+        env_file:
+            - ngrok.env
+        ports:
+            - "4040:4040"
