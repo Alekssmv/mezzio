@@ -4,7 +4,7 @@ use Phpmig\Migration\Migration;
 class AddUsersTable extends Migration
 {
     /**
-     * Do the migration
+     * Создем таблицу users
      */
     public function up()
     {
@@ -18,7 +18,7 @@ class AddUsersTable extends Migration
     }
 
     /**
-     * Undo the migration
+     * Удаляем таблицу users
      */
     public function down()
     {
