@@ -1,8 +1,6 @@
 <?php
 
 use Phpmig\Migration\Migration;
-use Illuminate\Database\Capsule\Manager as Capsule;
-
 class AddUsersTable extends Migration
 {
     /**
@@ -11,13 +9,12 @@ class AddUsersTable extends Migration
     public function up()
     {
         $container = $this->getContainer();
-        $capsule = $container['db']($container);
-
-        $capsule->schema()->create('users', function ($table) {
-            $table->string('name', 255);
+        $db = $container['db']($container);
+        $db->schema()->create('users', function ($table) {
+            $table->increments('id');
+            $table->string('name');
             $table->timestamps();
         });
-        
     }
 
     /**
@@ -26,8 +23,7 @@ class AddUsersTable extends Migration
     public function down()
     {
         $container = $this->getContainer();
-        $capsule = $container['db']($container);
-
-        $capsule->schema()->dropIfExists('users');
+        $db = $container['db']($container);
+        $db->schema()->drop('users');
     }
 }
