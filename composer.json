@@ -46,6 +46,8 @@
         "php": "^7.4 || ~8.0.0 || ~8.1.0",
         "amocrm/amocrm-api-library": "^1.4",
         "composer/package-versions-deprecated": "^1.10.99",
+        "davedevelopment/phpmig": "^1.7",
+        "illuminate/database": "^8.83",
         "laminas/laminas-component-installer": "^2.6",
         "laminas/laminas-config-aggregator": "^1.6",
         "laminas/laminas-diactoros": "^2.7",

@@ -40,7 +40,7 @@ class HomePageHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $data = [];
-        
+
         switch ($this->containerName) {
             case PimpleContainer::class:
                 $data['containerName'] = 'Pimple';
