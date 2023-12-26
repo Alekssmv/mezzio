@@ -34,6 +34,6 @@ services:
         image: wernight/ngrok
         restart: always
         env_file:
-            - ngrok.env
+            - .ngrok.env
         ports:
             - "4040:4040"
