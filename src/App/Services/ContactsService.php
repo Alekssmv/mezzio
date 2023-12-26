@@ -95,6 +95,7 @@ class ContactsService
     }
 
     /**
+     * Принимает форматированные методом formatContacts контакты
      * Фильтруем контакты
      * @param array $contacts - контакты из amoCRM
      * @param array $reqFields - обязательные поля
@@ -117,6 +118,7 @@ class ContactsService
     }
 
     /**
+     * Принимает форматированные методом formatContacts контакты
      * Дублируем контакты с многочисленными значениями выбранных полей
      * @param array $contacts - контакты из amoCRM
      * @param array $fields - поля, по которым нужно дублировать контакты
@@ -140,6 +142,7 @@ class ContactsService
     }
 
     /**
+     * Принимает форматированные методом formatContacts контакты
      * Форматируем массив с контактами по $field_names для отправки в Unisender
      *
      * Пример переменной $field_names =
