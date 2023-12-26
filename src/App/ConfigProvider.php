@@ -50,6 +50,7 @@ class ConfigProvider
                 Handler\GetContactsHandler::class => Factory\GetContactsHandlerFactory::class,
                 Handler\UnisenderContactHandler::class => Factory\UnisenderContactHandlerFactory::class,
                 Handler\SendContactsToUnisenderHandler::class => Factory\SendContactsToUnisenderHandlerFactory::class,
+                Handler\GetUniApiKeyHandler::class => Factory\GetUniApiKeyHandlerFactory::class,
             ]
         ];
     }
