@@ -50,9 +50,13 @@ services:
             - applicationMysqlFiles:/var/lib/mysql-files
 
     # Ngrok Service
+    # Связывается с nginx по порту 81
+    # env файл содержит токен NGROK_HOSTNAME - имя домена, NGROK_AUTH - authtoken из ngrok.com
     ngrok:
         image: wernight/ngrok
         restart: always
+        environment:
+            - "NGROK_PORT=application-nginx:81"
         env_file:
             - .ngrok.env
         ports:
