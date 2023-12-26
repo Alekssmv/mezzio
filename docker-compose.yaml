@@ -33,6 +33,8 @@ services:
     ngrok:
         image: wernight/ngrok
         restart: always
+        environment:
+            - "NGROK_PORT=application-nginx:81"
         env_file:
             - .ngrok.env
         ports:
