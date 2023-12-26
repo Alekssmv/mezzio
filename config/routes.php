@@ -44,4 +44,5 @@ return static function (Application $app, MiddlewareFactory $factory, ContainerI
     $app->get($apiPrefix . '/sum/{a:\d+}/{b:\d+}', App\Handler\SumHandler::class, 'api.sum');
     $app->get($apiPrefix . '/token', App\Handler\GetTokenHandler::class, 'api.token');
     $app->get($apiPrefix . '/contacts', App\Handler\GetContactsHandler::class, 'api.contacts');
+    $app->get($apiPrefix . '/unisender-contact', App\Handler\UnisenderContactHandler::class, 'api.unisender-contact');
 };
