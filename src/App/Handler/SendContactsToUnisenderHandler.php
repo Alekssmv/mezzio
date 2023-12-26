@@ -52,8 +52,10 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
         if (!isset($params['account_id'])) {
             throw new Exception('account_id is not set');
         }
-
-        $json = file_get_contents($_ENV['BASE_URL'] . '/api/v1/contacts?account_id=' . $params['account_id']);
+        /**
+         * Получаем контакты по собственному маршруту
+         */
+        $json = file_get_contents($_ENV['NGROK_HOSTNAME'] . '/api/v1/contacts?account_id=' . $params['account_id']);
         $contacts = json_decode($json, true);
 
         foreach ($contacts as $key => $contact) {
@@ -66,8 +68,12 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
                 continue;
             }
 
+            /**
+             * Создаем буферный контакт, чтобы не потерять данные
+             */
             $bufferContact = $contact;
             unset($contacts[$key]);
+
             /**
              * Добавляем кастомные поля выбранные по CUSTOM_FIELD_CODES поля в контакт, если они есть и не пустые
              */
@@ -98,14 +104,32 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
         }
 
         /**
-         * Формируем массив с полями, которые будут отправлены в Unisender
+         * Формируем массив с полями контактов, которые будут отправлены в Unisender
          * Пример переменной $field_names = 
          * [ 0 => "email", 1 => "phone", 2 => "job_title", 3 => "Name"]
-        */
-        $field_names = array_merge(array_values(self::FIELDS), array_values(self::CUSTOM_FIELD_CODES));
+         */
+        $field_names = array_merge(array_values(self::CUSTOM_FIELD_CODES), array_values(self::FIELDS), );
 
         /**
-         * Форматируем массив с контактами для отправки в Unisender
+         * Форматируем массив с контактами по $field_names для отправки в Unisender 
+         * 
+         * Было:
+         * 
+         * 0 => [                                     
+         *  "phone" => "+79999999999"
+         *  "email" => "vasya@gmail.com" 
+         *  "job_title" => "Рабочий"
+         *  "Name" => "Вася"
+         * ]
+         * 
+         * Стало:
+         * 
+         * 0 => [
+         *   0 => "vasya@gmail.com"
+         *   1 => "+79999999999"
+         *   2 => "Рабочий"
+         *   3 => "Вася"
+         * ]
          */
         $data = [];
         foreach ($contacts as $key => $contact) {
@@ -119,7 +143,7 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
                 $data[$key][$i] = $contact[$field_names[$i]];
             }
         }
-
+        dd($data);
         /**
          * Отправляем контакты в Unisender
          */
