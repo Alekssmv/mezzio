@@ -1,7 +1,6 @@
 <?php
 
 include __DIR__ . '/vendor/autoload.php';
-include __DIR__ . '/config/bootstrap.php';
 
 use \Phpmig\Adapter;
 use Illuminate\Database\Capsule\Manager as Capsule;
