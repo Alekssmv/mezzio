@@ -11,6 +11,9 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Unisender\ApiWrapper\UnisenderApi;
 use Exception;
 
+/**
+ * Маршрут для отправки контактов из amoCrm в Unisender
+ */
 class SendContactsToUnisenderHandler implements RequestHandlerInterface
 {
     /**
@@ -143,7 +146,7 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
                 $data[$key][$i] = $contact[$field_names[$i]];
             }
         }
-        dd($data);
+
         /**
          * Отправляем контакты в Unisender
          */
