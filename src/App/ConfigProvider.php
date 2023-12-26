@@ -9,6 +9,7 @@ use App\Client\ApiClientFactory;
 use App\Client\HttpClient;
 use App\Client\HttpClientFactory;
 
+
 /**
  * The configuration provider for the App module
  *
@@ -36,6 +37,9 @@ class ConfigProvider
     public function getDependencies(): array
     {
         return [
+            'aliases' => [
+                
+            ],
             'invokables' => [
                 Handler\PingHandler::class => Handler\PingHandler::class,
                
@@ -51,6 +55,7 @@ class ConfigProvider
                 Handler\UnisenderContactHandler::class => Factory\UnisenderContactHandlerFactory::class,
                 Handler\SendContactsToUnisenderHandler::class => Factory\SendContactsToUnisenderHandlerFactory::class,
                 Handler\GetUniApiKeyHandler::class => Factory\GetUniApiKeyHandlerFactory::class,
+                Interfaces\Repository\AccountRepositoryInterface::class => Repositories\AccountRepository::class,
             ]
         ];
     }

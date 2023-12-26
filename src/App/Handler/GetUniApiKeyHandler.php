@@ -8,6 +8,7 @@ use AmoCRM\Client\AmoCRMApiClient;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 class GetUniApiKeyHandler implements RequestHandlerInterface
 {
@@ -20,7 +21,7 @@ class GetUniApiKeyHandler implements RequestHandlerInterface
     }
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        
+
         if ($request->getMethod() !== 'POST') {
             die('Wrong request method');
         }
