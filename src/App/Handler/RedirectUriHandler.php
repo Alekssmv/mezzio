@@ -43,7 +43,8 @@ class RedirectUriHandler implements RequestHandlerInterface
         }
         return new HtmlResponse(
             $this->renderer->render(
-                'app::redirect-uri', $data
+                'app::redirect-uri',
+                $data
             )
         );
     }

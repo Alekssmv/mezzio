@@ -9,7 +9,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Unisender\ApiWrapper\UnisenderApi;
-use Exception;
 
 /**
  * Маршрут для отправки контактов из amoCrm в Unisender
@@ -21,7 +20,6 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
      * Ключ - код кастомного поля. Значение - ключ, который добавится в элемент $contacts.
      */
     private const CUSTOM_FIELD_CODES = [
-        'EMAIL' => 'email',
         'PHONE' => 'phone',
         'POSITION' => 'job_title',
     ];
@@ -30,7 +28,7 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
      * Обычные поля, которые будут добавлены в элементы массива $contacts перед отправкой в Unisender
      */
     private const FIELDS = [
-        'name' => 'Name'
+        'name' => 'Name',
     ];
 
     /**
@@ -40,6 +38,9 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
         'email' => 'email',
     ];
 
+    /**
+     * Клиент для работы с Unisender API
+     */
     private UnisenderApi $unisenderApiClient;
     public function __construct(
         UnisenderApi $unisenderApiClient
@@ -53,7 +54,7 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
         $params = $request->getQueryParams();
 
         if (!isset($params['account_id'])) {
-            throw new Exception('account_id is not set');
+            die('account_id is not set');
         }
         /**
          * Получаем контакты по собственному маршруту
@@ -96,6 +97,17 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
             }
 
             /**
+             * Добавляем дубли контактов с разными email
+             */
+            foreach ($bufferContact['custom_fields_values'] as $custom_field) {
+                if (filter_var($custom_field['values'][0]['value'], FILTER_VALIDATE_EMAIL)) {
+                    $buff = $contacts[$key];
+                    $buff['email'] = $custom_field['values'][0]['value'];
+                    $contacts[] = $buff;
+                }
+            }
+
+            /**
              * Если нет обязательных полей (REQ_FIELDS), то удаляем контакт
              */
             foreach (self::REQ_FIELDS as $req_field) {
@@ -108,25 +120,24 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
 
         /**
          * Формируем массив с полями контактов, которые будут отправлены в Unisender
-         * Пример переменной $field_names = 
+         * Пример переменной $field_names =
          * [ 0 => "email", 1 => "phone", 2 => "job_title", 3 => "Name"]
          */
-        $field_names = array_merge(array_values(self::CUSTOM_FIELD_CODES), array_values(self::FIELDS), );
+        $field_names = array_merge(array_values(self::CUSTOM_FIELD_CODES), array_values(self::FIELDS), array_values(self::REQ_FIELDS));
 
         /**
-         * Форматируем массив с контактами по $field_names для отправки в Unisender 
-         * 
+         * Форматируем массив с контактами по $field_names для отправки в Unisender
+         *
          * Было:
-         * 
-         * 0 => [                                     
+         *
+         * 0 => [
          *  "phone" => "+79999999999"
-         *  "email" => "vasya@gmail.com" 
+         *  "email" => "vasya@gmail.com"
          *  "job_title" => "Рабочий"
          *  "Name" => "Вася"
          * ]
-         * 
+         *
          * Стало:
-         * 
          * 0 => [
          *   0 => "vasya@gmail.com"
          *   1 => "+79999999999"

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Handler;
 
-
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -52,13 +51,18 @@ class GetContactsHandler implements RequestHandlerInterface
             $baseDomain = $accessToken->getValues()['baseDomain'];
             $apiClient->setAccessToken($accessToken)->setAccountBaseDomain($baseDomain);
             $contacts = $apiClient->contacts()->get();
-
         } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+            var_dump($e->getMessage());
+            die();
         }
 
-        if (empty($contacts)) {
-            throw new Exception('contacts not found');
+        try {
+            if (empty($contacts)) {
+                throw new Exception('contacts not found');
+            }
+        } catch (Exception $e) {
+            var_dump($e->getMessage());
+            die();
         }
 
         return new JsonResponse($contacts);
