@@ -52,8 +52,7 @@ class GetContactsHandler implements RequestHandlerInterface
             $apiClient->setAccessToken($accessToken)->setAccountBaseDomain($baseDomain);
             $contacts = $apiClient->contacts()->get();
         } catch (Exception $e) {
-            var_dump($e->getMessage());
-            die();
+            return new JsonResponse(['error' => $e->getMessage()]);
         }
 
         try {
@@ -61,8 +60,7 @@ class GetContactsHandler implements RequestHandlerInterface
                 throw new Exception('contacts not found');
             }
         } catch (Exception $e) {
-            var_dump($e->getMessage());
-            die();
+            return new JsonResponse(['error' => $e->getMessage()]);
         }
 
         return new JsonResponse($contacts);

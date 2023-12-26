@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Factory;
 
 use App\Handler\SendContactsToUnisenderHandler;
+use App\Services\ContactsService;
 use Psr\Container\ContainerInterface;
 use App\Handler\RedirectUriHandler;
 
@@ -14,7 +15,7 @@ class SendContactsToUnisenderHandlerFactory
     {
         return new SendContactsToUnisenderHandler(
             $container->get(UnisenderApiClientFactory::class),
-            $container->get(AmoCRMApiClientFactory::class),
+            $container->get(ContactsService::class),
         );
     }
 }

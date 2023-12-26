@@ -50,7 +50,8 @@ class ConfigProvider
                 Handler\GetContactsHandler::class => Factory\GetContactsHandlerFactory::class,
                 Handler\UnisenderContactHandler::class => Factory\UnisenderContactHandlerFactory::class,
                 Handler\SendContactsToUnisenderHandler::class => Factory\SendContactsToUnisenderHandlerFactory::class,
-            ]
+                Services\ContactsService::class => Factory\ContactsServiceFactory::class,
+            ],
         ];
     }
 
