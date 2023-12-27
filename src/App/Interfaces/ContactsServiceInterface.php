@@ -16,4 +16,6 @@ interface ContactsServiceInterface
     public function dublicateContacts(array $contacts, array $fields): array;
 
     public function getDataForUnisender(array $contacts, array $fieldNames): array;
+
+    public function getFieldNames(array $fields, array $customFieldNames, array $fieldsMultiVal): array;
 }
