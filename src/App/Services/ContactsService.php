@@ -22,8 +22,13 @@ class ContactsService implements ContactsServiceInterface
      * Ключ - имя кастомного поля, значение - название поля, которое добавится в элементы $contacts
      * Пример: ['name' => 'Name',]
      * @param array $fieldsMultiVal - поля, которые нужно добавить в элементы $contacts и которые могут иметь множество значений
-     * Ключ и значение - название поля, которое добавится в элементы $contacts
-     * Пример: ['email' => 'email',]
+     * Ключ - имя поля (field_name). 'enum_code' - признак по которому будут добавляться поля. 'name' - поле, которое добавится в элемент $contacts
+     * Пример: [
+     *  'Email' => [
+     *      'enum_code' => 'WORK',
+     *      'name' => 'email'
+     *      ]
+     *  ];
      * @return array - отформатированные контакты
      */
     public function formatContacts(array $contacts, array $customFieldNames, array $fields, array $fieldsMultiVal = []): array
@@ -39,12 +44,12 @@ class ContactsService implements ContactsServiceInterface
             /**
              * Добавляем кастомные поля выбранные по $customFieldNames поля в контакт, если они есть и не пустые
              */
-            foreach ($bufferContact['custom_fields_values'] as $custom_field) {
+            foreach ($bufferContact['custom_fields_values'] as $customField) {
                 if (
-                    isset($customFieldNames[$custom_field['field_name']]) &&
-                    !empty($custom_field['values'][0]['value'])
+                    isset($customFieldNames[$customField['field_name']]) &&
+                    !empty($customField['values'][0]['value'])
                 ) {
-                    $contacts[$key][$customFieldNames[$custom_field['field_name']]] = $custom_field['values'][0]['value'];
+                    $contacts[$key][$customFieldNames[$customField['field_name']]] = $customField['values'][0]['value'];
                 }
             }
 
@@ -57,15 +62,18 @@ class ContactsService implements ContactsServiceInterface
                 }
             }
 
-            if (isset($fieldsMultiVal['Email'])) {
-                /**
-                 * Добавляем множество email'ов в контакт
-                 */
-                foreach ($bufferContact['custom_fields_values'] as $custom_field) {
-                    if (filter_var($custom_field['values'][0]['value'], FILTER_VALIDATE_EMAIL)) {
-                        foreach ($custom_field['values'] as $value) {
-                            if ($value['enum_code'] === 'WORK') {
-                                $contacts[$key]['email'][] = $value['value'];
+            /*
+             * Добавляем поля с множественными значениями выбранные по $fieldsMultiVal поля в контакт
+             */
+            foreach ($fieldsMultiVal as $fieldKey => $fieldValue) {
+                foreach ($bufferContact['custom_fields_values'] as $customField) {
+                    if (
+                        $customField['field_name'] === $fieldKey &&
+                        isset($customField['values'])
+                    ) {
+                        foreach ($customField['values'] as $value) {
+                            if ($value['enum_code'] === $fieldValue['enum_code']) {
+                                $contacts[$key][$fieldValue['name']][] = $value['value'];
                             }
                         }
                     }

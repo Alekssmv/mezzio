@@ -25,7 +25,6 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
     private const CUSTOM_FIELD_NAMES = [
         'Телефон' => 'phone',
         'Должность' => 'job_title',
-        'Рабочий email' => 'email'
     ];
 
     /**
@@ -38,10 +37,13 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
 
     /**
      * Поля которые будут содержать множество значений
-     * Ключ - имя кастомного поля. Значение - enum_code, по которому будут добавляться значения
+     * Ключ - имя поля (field_name). 'enum_code' - признак по которому будут добавляться поля. 'name' - поле, которое добавится в элемент $contacts
      */
     private const FIELDS_MULTI_VAL = [
-        'Email' => 'WORK',
+        'Email' => [
+            'enum_code' => 'WORK',
+            'name' => 'email'
+        ]
     ];
 
     /**
