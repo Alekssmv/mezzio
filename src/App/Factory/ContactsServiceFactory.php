@@ -15,8 +15,6 @@ class ContactsServiceFactory
 {
     public function __invoke(ContainerInterface $container): ContactsService
     {
-        return new ContactsService(
-            $container->get(AmoCRMApiClientFactory::class)
-        );
+        return new ContactsService();
     }
 }
