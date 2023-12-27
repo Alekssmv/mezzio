@@ -9,7 +9,7 @@ use App\Handler\SumHandler;
 
 class SumHandlerFactory
 {
-    public function __invoke(ContainerInterface $container) : SumHandler
+    public function __invoke(ContainerInterface $container): SumHandler
     {
         return new SumHandler();
     }

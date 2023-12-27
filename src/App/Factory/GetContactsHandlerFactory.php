@@ -10,8 +10,8 @@ use Psr\Container\ContainerInterface;
 
 class GetContactsHandlerFactory
 {
-    public function __invoke(ContainerInterface $container) : GetContactsHandler
-    { 
+    public function __invoke(ContainerInterface $container): GetContactsHandler
+    {
         return new GetContactsHandler($container->get(AmoCRMApiClientFactory::class));
     }
 }

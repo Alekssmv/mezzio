@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class SumHandler implements RequestHandlerInterface
 {
-    public function handle(ServerRequestInterface $request) : ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $a = (int) $request->getAttribute('a');
         $b = (int) $request->getAttribute('b');
