@@ -101,7 +101,7 @@ class ContactsService implements ContactsServiceInterface
     /**
      * Принимает форматированные методом formatContacts контакты
      * Фильтруем контакты
-     * @param array $contacts - контакты из amoCRM
+     * @param array $contacts - форматированные контакты
      * @param array $reqFields - обязательные поля
      * @return array - отфильтрованные контакты
      */
@@ -124,7 +124,7 @@ class ContactsService implements ContactsServiceInterface
     /**
      * Принимает форматированные методом formatContacts контакты
      * Дублируем контакты с многочисленными значениями выбранных полей
-     * @param array $contacts - контакты из amoCRM
+     * @param array $contacts - форматированные контакты
      * @param array $fields - поля, по которым нужно дублировать контакты
      */
     public function dublicateContacts(array $contacts, array $fields): array
@@ -148,7 +148,9 @@ class ContactsService implements ContactsServiceInterface
     /**
      * Принимает форматированные методом formatContacts контакты
      * Форматируем массив с контактами по $field_names для отправки в Unisender
-     *
+     * @param array $contacts - форматированные контакты
+     * @param array $fieldNames - поля по которым будет произведено форматирование
+     * @return array - data для отправки в unisender
      * Пример переменной $field_names =
      * [ 0 => "email", 1 => "phone", 2 => "job_title", 3 => "Name"]
      *

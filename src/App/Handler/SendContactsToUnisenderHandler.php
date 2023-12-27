@@ -79,8 +79,6 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
         $contacts = $this->contactsService->dublicateContacts($contacts, self::REQ_FIELDS);
         $fieldNames = array_merge(array_values(self::CUSTOM_FIELD_CODES), array_values(self::FIELDS), array_values(self::FIELDS_MULTI_VAL));
         $data = $this->contactsService->getDataForUnisender($contacts, $fieldNames);
-        
-        
 
         $params = [
             'format' => 'json',
