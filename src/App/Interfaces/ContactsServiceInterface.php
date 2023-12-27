@@ -9,10 +9,6 @@ namespace App\Interfaces;
  */
 interface ContactsServiceInterface
 {
-    public function setToken(int $accountId): void;
-
-    public function getContacts(): array;
-
     public function formatContacts(array $contacts, array $customFieldCodes, array $fields, array $fieldsMultiVal): array;
 
     public function filterContacts(array $contacts, array $reqFields): array;

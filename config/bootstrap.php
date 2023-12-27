@@ -12,7 +12,7 @@ $dotenv->load(__DIR__ . '/../.env');
 
 $config = require __DIR__ . '/autoload/database.global.php';
 /**
- * Добавляем capsule в bootstrap, чтобы можно было использовать модели в приложении
+ * Добавляем capsule в bootstrap, чтобы можно было использовать модели таблиц бд
  */
 $capsule = new Capsule();
 $capsule->addConnection($config['database']);
