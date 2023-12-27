@@ -42,11 +42,13 @@ class ConfigProvider
             ],
             'invokables' => [
                 Handler\PingHandler::class => Handler\PingHandler::class,
-               
+
             ],
             'factories' => [
                 Factory\AmoCRMApiClientFactory::class => Factory\AmoCRMApiClientFactory::class,
                 Factory\UnisenderApiClientFactory::class => Factory\UnisenderApiClientFactory::class,
+                Factory\UserServiceFactory::class => Factory\UserServiceFactory::class,
+
                 Handler\HomePageHandler::class => Factory\HomePageHandlerFactory::class,
                 Handler\SumHandler::class => Factory\SumHandlerFactory::class,
                 Handler\GetTokenHandler::class => Factory\GetTokenHandlerFactory::class,
@@ -56,7 +58,9 @@ class ConfigProvider
                 Handler\SendContactsToUnisenderHandler::class => Factory\SendContactsToUnisenderHandlerFactory::class,
                 Handler\GetUniApiKeyHandler::class => Factory\GetUniApiKeyHandlerFactory::class,
                 Interfaces\Repository\AccountRepositoryInterface::class => Repositories\AccountRepository::class,
-            ]
+            
+                Handler\CreateUserHandler::class => Factory\CreateUserHandlerFactory::class,
+            ],
         ];
     }
 

@@ -12,8 +12,8 @@ use Unisender\ApiWrapper\UnisenderApi;
  */
 class UnisenderApiClientFactory
 {
-    public function __invoke(ContainerInterface $container) : UnisenderApi
-    { 
+    public function __invoke(ContainerInterface $container): UnisenderApi
+    {
         $uniSenderApiClient = new UnisenderApi($_ENV["UNISENDER_API_KEY"]);
         return $uniSenderApiClient;
     }

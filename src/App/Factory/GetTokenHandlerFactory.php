@@ -9,8 +9,8 @@ use App\Handler\GetTokenHandler;
 
 class GetTokenHandlerFactory
 {
-    public function __invoke(ContainerInterface $container) : GetTokenHandler
-    { 
+    public function __invoke(ContainerInterface $container): GetTokenHandler
+    {
         return new GetTokenHandler($container->get(AmoCRMApiClientFactory::class));
     }
 }

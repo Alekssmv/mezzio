@@ -91,7 +91,8 @@ class GetTokenHandler implements RequestHandlerInterface
             $accountId = $apiClient->setAccessToken($accessToken)->account()->getCurrent()->toArray()['id'];
             if (!$accessToken->hasExpired()) {
                 TokenActions::saveToken(
-                    $accountId, [
+                    $accountId,
+                    [
                         'accessToken' => $accessToken->getToken(),
                         'refreshToken' => $accessToken->getRefreshToken(),
                         'expires' => $accessToken->getExpires(),
