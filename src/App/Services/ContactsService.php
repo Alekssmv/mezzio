@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use AmoCRM\Client\AmoCRMApiClient;
-use App\Helper\TokenActions;
 use App\Interfaces\ContactsServiceInterface;
 
 /**
@@ -13,34 +11,6 @@ use App\Interfaces\ContactsServiceInterface;
  */
 class ContactsService implements ContactsServiceInterface
 {
-    /**
-     * Клиент для работы с API amoCRM
-     */
-    private AmoCRMApiClient $apiClient;
-    public function __construct(
-        AmoCRMApiClient $apiClient
-    ) {
-        $this->apiClient = $apiClient;
-    }
-    /**
-     * Устанавливаем токен для этого сервиса
-     */
-    public function setToken(int $accountId): void
-    {
-        $accessToken = TokenActions::getToken($accountId);
-        $baseDomain = $accessToken->getValues()['baseDomain'];
-        $this->apiClient->setAccessToken($accessToken)->setAccountBaseDomain($baseDomain);
-    }
-
-    /**
-     * Получаем контакты из amoCRM
-     * @return array
-     */
-    public function getContacts(): array
-    {
-        $contacts = $this->apiClient->contacts()->get()->toArray();
-        return $contacts;
-    }
 
     /**
      * Форматируем контакты
@@ -48,15 +18,15 @@ class ContactsService implements ContactsServiceInterface
      * @param array $fields - поля, которые нужно добавить в элементы $contacts
      * Ключ - название поля (в контакте из amoCrm), значение - название поля, которое добавится в элементы $contacts
      * Пример: ['PHONE' => 'phone', 'POSITION' => 'job_title',]
-     * @param array $customFieldCodes - кастомные поля, которые нужно добавить в элементы $contacts
-     * Ключ - код кастомного поля, значение - название поля, которое добавится в элементы $contacts
+     * @param array $customFieldNames - кастомные поля, которые нужно добавить в элементы $contacts
+     * Ключ - имя кастомного поля, значение - название поля, которое добавится в элементы $contacts
      * Пример: ['name' => 'Name',]
      * @param array $fieldsMultiVal - поля, которые нужно добавить в элементы $contacts и которые могут иметь множество значений
      * Ключ и значение - название поля, которое добавится в элементы $contacts
      * Пример: ['email' => 'email',]
      * @return array - отформатированные контакты
      */
-    public function formatContacts(array $contacts, array $customFieldCodes, array $fields, array $fieldsMultiVal): array
+    public function formatContacts(array $contacts, array $customFieldNames, array $fields, array $fieldsMultiVal = []): array
     {
         foreach ($contacts as $key => $contact) {
 
@@ -67,11 +37,14 @@ class ContactsService implements ContactsServiceInterface
             unset($contacts[$key]);
 
             /**
-             * Добавляем кастомные поля выбранные по $customFieldCodes поля в контакт, если они есть и не пустые
+             * Добавляем кастомные поля выбранные по $customFieldNames поля в контакт, если они есть и не пустые
              */
             foreach ($bufferContact['custom_fields_values'] as $custom_field) {
-                if (isset($customFieldCodes[$custom_field['field_code']]) && !empty($custom_field['values'][0]['value'])) {
-                    $contacts[$key][$customFieldCodes[$custom_field['field_code']]] = $custom_field['values'][0]['value'];
+                if (
+                    isset($customFieldNames[$custom_field['field_name']]) &&
+                    !empty($custom_field['values'][0]['value'])
+                ) {
+                    $contacts[$key][$customFieldNames[$custom_field['field_name']]] = $custom_field['values'][0]['value'];
                 }
             }
 
@@ -84,13 +57,17 @@ class ContactsService implements ContactsServiceInterface
                 }
             }
 
-            if (isset($fieldsMultiVal['email'])) {
+            if (isset($fieldsMultiVal['Email'])) {
                 /**
                  * Добавляем множество email'ов в контакт
                  */
                 foreach ($bufferContact['custom_fields_values'] as $custom_field) {
                     if (filter_var($custom_field['values'][0]['value'], FILTER_VALIDATE_EMAIL)) {
-                        $contacts[$key]['email'][] = $custom_field['values'][0]['value'];
+                        foreach ($custom_field['values'] as $value) {
+                            if ($value['enum_code'] === 'WORK') {
+                                $contacts[$key]['email'][] = $value['value'];
+                            }
+                        }
                     }
                 }
             }
@@ -126,6 +103,7 @@ class ContactsService implements ContactsServiceInterface
      * Дублируем контакты с многочисленными значениями выбранных полей
      * @param array $contacts - форматированные контакты
      * @param array $fields - поля, по которым нужно дублировать контакты
+     * @return array
      */
     public function dublicateContacts(array $contacts, array $fields): array
     {

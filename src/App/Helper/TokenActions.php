@@ -17,13 +17,14 @@ class TokenActions
     /**
      * Сохраняет токен в TOKEN_FILE по $accountId
      * Если переданы не все параметры, то выходит из скрипта
-     * @param int $accountId 
-     * @param array $accessToken 
+     * @param int $accountId
+     * @param array $accessToken
      */
-    static function saveToken(int $accountId, array $accessToken)
+    public static function saveToken(int $accountId, array $accessToken)
     {
         $data = self::getTokens();
-        if (isset($accessToken)
+        if (
+            isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
@@ -41,9 +42,9 @@ class TokenActions
      * Возвращает токен из TOKEN_FILE по $accountId
      * Если токен некорректный или его нет, то возвращает Null
      * @param int $accountId
-     * @return AccessToken|null
+     * @return AccessToken
      */
-    static function getToken(int $accountId): AccessToken
+    public static function getToken(int $accountId): AccessToken
     {
         if (!file_exists(TOKEN_FILE)) {
             throw new Exception('Access token file not found');
@@ -52,7 +53,8 @@ class TokenActions
         $data = json_decode(file_get_contents(TOKEN_FILE), true);
         $accessToken = $data[$accountId] ?? null;
 
-        if (isset($accessToken)
+        if (
+            isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
@@ -75,7 +77,7 @@ class TokenActions
      * @param int $accountId
      * @return bool
      */
-    static function isTokenExist(int $accountId): bool
+    public static function isTokenExist(int $accountId): bool
     {
         if (!file_exists(TOKEN_FILE)) {
             return false;
@@ -84,7 +86,8 @@ class TokenActions
         $data = json_decode(file_get_contents(TOKEN_FILE), true);
         $accessToken = $data[$accountId] ?? null;
 
-        if (isset($accessToken)
+        if (
+            isset($accessToken)
             && isset($accessToken['accessToken'])
             && isset($accessToken['refreshToken'])
             && isset($accessToken['expires'])
@@ -99,7 +102,7 @@ class TokenActions
      * Возвращает все токены из TOKEN_FILE
      * @return array
      */
-    static function getTokens(): array
+    public static function getTokens(): array
     {
         if (!file_exists(TOKEN_FILE)) {
             return [];

@@ -36,9 +36,6 @@ class ConfigProvider
     public function getDependencies(): array
     {
         return [
-            'aliases' => [
-                Interfaces\ContactsServiceInterface::class => Services\ContactsService::class,
-            ],
             'invokables' => [
                 Handler\PingHandler::class => Handler\PingHandler::class,
 
@@ -53,7 +50,6 @@ class ConfigProvider
                 Handler\GetContactsHandler::class => Factory\GetContactsHandlerFactory::class,
                 Handler\UnisenderContactHandler::class => Factory\UnisenderContactHandlerFactory::class,
                 Handler\SendContactsToUnisenderHandler::class => Factory\SendContactsToUnisenderHandlerFactory::class,
-                Services\ContactsService::class => Factory\ContactsServiceFactory::class,
             ],
         ];
     }
