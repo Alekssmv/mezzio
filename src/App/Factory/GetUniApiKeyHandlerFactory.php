@@ -6,15 +6,14 @@ namespace App\Factory;
 
 use App\Handler\GetUniApiKeyHandler;
 use Psr\Container\ContainerInterface;
-use App\Interfaces\Repository\AccountRepositoryInterface;
 
 class GetUniApiKeyHandlerFactory
 {
-    public function __invoke(ContainerInterface $container) : GetUniApiKeyHandler
-    { 
-        dd($container);
+    public function __invoke(ContainerInterface $container): GetUniApiKeyHandler
+    {
         return new GetUniApiKeyHandler(
             $container->get(AmoCRMApiClientFactory::class),
+            $container->get(AccountServiceFactory::class),
         );
     }
 }

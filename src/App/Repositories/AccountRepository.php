@@ -21,14 +21,13 @@ class AccountRepository implements AccountRepositoryInterface
     }
     /**
      * Принимает массив данных для создания аккаунта,
-     * ключ - название поля в таблице, значение - значение поля
-     * @param array $data
+     * @param array $data - ключ - название поля в таблице, значение - значение поля
      * @return void
      */
-    public function create(array $data)
+    public function create(array $data): Account
     {
         $this->account->fill($data);
         $this->account->save();
+        return $this->account;
     }
-    return $this->account;
 }

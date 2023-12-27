@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Client\ApiClient;
-use App\Client\ApiClientFactory;
-use App\Client\HttpClient;
-use App\Client\HttpClientFactory;
-
-
 /**
  * The configuration provider for the App module
  *
@@ -37,9 +31,6 @@ class ConfigProvider
     public function getDependencies(): array
     {
         return [
-            'aliases' => [
-                
-            ],
             'invokables' => [
                 Handler\PingHandler::class => Handler\PingHandler::class,
 
@@ -48,6 +39,7 @@ class ConfigProvider
                 Factory\AmoCRMApiClientFactory::class => Factory\AmoCRMApiClientFactory::class,
                 Factory\UnisenderApiClientFactory::class => Factory\UnisenderApiClientFactory::class,
                 Factory\UserServiceFactory::class => Factory\UserServiceFactory::class,
+                Factory\AccountServiceFactory::class => Factory\AccountServiceFactory::class,
 
                 Handler\HomePageHandler::class => Factory\HomePageHandlerFactory::class,
                 Handler\SumHandler::class => Factory\SumHandlerFactory::class,
@@ -57,8 +49,6 @@ class ConfigProvider
                 Handler\UnisenderContactHandler::class => Factory\UnisenderContactHandlerFactory::class,
                 Handler\SendContactsToUnisenderHandler::class => Factory\SendContactsToUnisenderHandlerFactory::class,
                 Handler\GetUniApiKeyHandler::class => Factory\GetUniApiKeyHandlerFactory::class,
-                Interfaces\Repository\AccountRepositoryInterface::class => Repositories\AccountRepository::class,
-            
                 Handler\CreateUserHandler::class => Factory\CreateUserHandlerFactory::class,
             ],
         ];
