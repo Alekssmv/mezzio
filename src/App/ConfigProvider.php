@@ -43,6 +43,8 @@ class ConfigProvider
             'factories' => [
                 Factory\AmoCRMApiClientFactory::class => Factory\AmoCRMApiClientFactory::class,
                 Factory\UnisenderApiClientFactory::class => Factory\UnisenderApiClientFactory::class,
+                Factory\UserServiceFactory::class => Factory\UserServiceFactory::class,
+
                 Handler\HomePageHandler::class => Factory\HomePageHandlerFactory::class,
                 Handler\SumHandler::class => Factory\SumHandlerFactory::class,
                 Handler\GetTokenHandler::class => Factory\GetTokenHandlerFactory::class,
@@ -50,6 +52,7 @@ class ConfigProvider
                 Handler\GetContactsHandler::class => Factory\GetContactsHandlerFactory::class,
                 Handler\UnisenderContactHandler::class => Factory\UnisenderContactHandlerFactory::class,
                 Handler\SendContactsToUnisenderHandler::class => Factory\SendContactsToUnisenderHandlerFactory::class,
+                Handler\CreateUserHandler::class => Factory\CreateUserHandlerFactory::class,
             ],
         ];
     }
