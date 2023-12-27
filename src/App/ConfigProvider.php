@@ -38,7 +38,7 @@ class ConfigProvider
         return [
             'invokables' => [
                 Handler\PingHandler::class => Handler\PingHandler::class,
-               
+
             ],
             'factories' => [
                 Factory\AmoCRMApiClientFactory::class => Factory\AmoCRMApiClientFactory::class,
@@ -49,7 +49,8 @@ class ConfigProvider
                 Handler\RedirectUriHandler::class => Factory\RedirectUriHandlerFactory::class,
                 Handler\GetContactsHandler::class => Factory\GetContactsHandlerFactory::class,
                 Handler\UnisenderContactHandler::class => Factory\UnisenderContactHandlerFactory::class,
-            ]
+                Handler\SendContactsToUnisenderHandler::class => Factory\SendContactsToUnisenderHandlerFactory::class,
+            ],
         ];
     }
 
