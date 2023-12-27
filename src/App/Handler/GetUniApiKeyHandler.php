@@ -10,12 +10,21 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Illuminate\Database\Capsule\Manager as Capsule;
 
+/**
+ * Принимает параметры unisender_key и account_id
+ * Создает запись в таблице accounts
+ */
 class GetUniApiKeyHandler implements RequestHandlerInterface
 {
+    /**
+     * @var AmoCRMApiClient - клиент для работы с API amoCRM
+     */
     private AmoCRMApiClient $apiClient;
 
+    /**
+     * @var AccountService - сервис для работы с аккаунтами
+     */
     private AccountService $accountService;
 
     public function __construct(

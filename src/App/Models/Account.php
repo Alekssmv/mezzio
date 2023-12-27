@@ -6,6 +6,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Модель для работы с таблицей accounts
+ */
 class Account extends Model
 {
     protected $table = 'accounts';

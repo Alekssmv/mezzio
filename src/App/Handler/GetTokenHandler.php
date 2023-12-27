@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
+use App\Services\TokenService;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,11 +15,21 @@ use App\Helper\TokenActions;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
+    /**
+     * @var AmoCRMApiClient - клиент для работы с API amoCRM
+     */
     private AmoCRMApiClient $apiClient;
+
+    /**
+     * @var TokenService - сервис для работы с токенами
+     */
+    private TokenService $tokenService;
     public function __construct(
-        AmoCRMApiClient $apiClient
+        AmoCRMApiClient $apiClient,
+        TokenService $tokenService
     ) {
         $this->apiClient = $apiClient;
+        $this->tokenService = $tokenService;
     }
     /**
      * Сохраняет токен в TOKEN_FILE локально, если он еще не получен или истек
@@ -26,11 +37,13 @@ class GetTokenHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+
         /**
          * Параметры запроса
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
+        $tokenService = $this->tokenService;
 
         /**
          * Полчаем токен по url параметру account_id
@@ -40,7 +53,7 @@ class GetTokenHandler implements RequestHandlerInterface
         } else {
             $accessToken = null;
         }
-        
+
         /**
          * Если токен есть и он не истек, то редиректим на /redirect-uri с параметром account_id
          */

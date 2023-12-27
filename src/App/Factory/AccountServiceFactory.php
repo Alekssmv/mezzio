@@ -10,7 +10,7 @@ use App\Services\AccountService;
 use Psr\Container\ContainerInterface;
 
 /**
- * Фабрика для создания экземпляра сервиса для работы с контактами
+ * Фабрика для создания экземпляра сервиса для работы с аккаунтами
  */
 class AccountServiceFactory
 {

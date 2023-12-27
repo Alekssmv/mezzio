@@ -7,6 +7,9 @@ namespace App\Services;
 use App\Models\Account;
 use App\Repositories\AccountRepository;
 
+/**
+ * Сервис для работы с аккаунтами
+ */
 class AccountService
 {
     private AccountRepository $accountRepository;
@@ -16,8 +19,8 @@ class AccountService
         $this->accountRepository = $accountRepository;
     }
     /**
-     * Создает пользователя с указанным именем в БД
-     * @param string $name - имя пользователя
+     * Создает аккаунт в таблице accounts
+     * @param array $data - ключ - название поля в таблице, значение - значение поля
      * @return Account
      */
     public function create(array $data): Account

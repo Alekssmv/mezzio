@@ -6,7 +6,7 @@ use App\Models\Account;
 use App\Interfaces\Repository\AccountRepositoryInterface;
 
 /**
- * Репозиторий для работы с аккаунтами
+ * Репозиторий для работы с таблицей accounts
  */
 class AccountRepository implements AccountRepositoryInterface
 {
