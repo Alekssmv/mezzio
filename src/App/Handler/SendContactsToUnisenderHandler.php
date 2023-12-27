@@ -30,7 +30,13 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
      */
     private const FIELDS = [
         'name' => 'Name',
-        'email' => 'email'
+    ];
+
+    /**
+     * Поля которые будут содержать множество значений
+     */
+    private const FIELDS_MULTI_VAL = [
+        'email' => 'email',
     ];
 
     /**
@@ -68,13 +74,14 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
 
         $this->contactsService->setToken((int) $params['account_id']);
         $contacts = $this->contactsService->getContacts();
-        
-        $contacts = $this->contactsService->formatContacts($contacts, self::CUSTOM_FIELD_CODES, self::FIELDS);
+        $contacts = $this->contactsService->formatContacts($contacts, self::CUSTOM_FIELD_CODES, self::FIELDS, self::FIELDS_MULTI_VAL);
         $contacts = $this->contactsService->filterContacts($contacts, self::REQ_FIELDS);
         $contacts = $this->contactsService->dublicateContacts($contacts, self::REQ_FIELDS);
-        $fieldNames = array_merge(array_values(self::CUSTOM_FIELD_CODES), array_values(self::FIELDS));
+        $fieldNames = array_merge(array_values(self::CUSTOM_FIELD_CODES), array_values(self::FIELDS), array_values(self::FIELDS_MULTI_VAL));
         $data = $this->contactsService->getDataForUnisender($contacts, $fieldNames);
         
+        
+
         $params = [
             'format' => 'json',
             'api_key' => $_ENV['UNISENDER_API_KEY'],

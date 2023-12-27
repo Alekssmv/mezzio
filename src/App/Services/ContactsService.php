@@ -6,11 +6,12 @@ namespace App\Services;
 
 use AmoCRM\Client\AmoCRMApiClient;
 use App\Helper\TokenActions;
+use App\Interfaces\ContactsServiceInterface;
 
 /**
  * Сервис, для работы с контактами
  */
-class ContactsService
+class ContactsService implements ContactsServiceInterface
 {
     /**
      * Клиент для работы с API amoCRM
@@ -45,14 +46,17 @@ class ContactsService
      * Форматируем контакты
      * @param array $contacts - контакты из amoCRM
      * @param array $fields - поля, которые нужно добавить в элементы $contacts
-     * Ключ - название поля, значение - код поля, которое добавится в элементы $contacts
+     * Ключ - название поля (в контакте из amoCrm), значение - название поля, которое добавится в элементы $contacts
      * Пример: ['PHONE' => 'phone', 'POSITION' => 'job_title',]
      * @param array $customFieldCodes - кастомные поля, которые нужно добавить в элементы $contacts
      * Ключ - код кастомного поля, значение - название поля, которое добавится в элементы $contacts
      * Пример: ['name' => 'Name',]
+     * @param array $fieldsMultiVal - поля, которые нужно добавить в элементы $contacts и которые могут иметь множество значений
+     * Ключ и значение - название поля, которое добавится в элементы $contacts
+     * Пример: ['email' => 'email',]
      * @return array - отформатированные контакты
      */
-    public function formatContacts(array $contacts, array $customFieldCodes, array $fields): array
+    public function formatContacts(array $contacts, array $customFieldCodes, array $fields, array $fieldsMultiVal): array
     {
         foreach ($contacts as $key => $contact) {
 
@@ -63,7 +67,7 @@ class ContactsService
             unset($contacts[$key]);
 
             /**
-             * Добавляем кастомные поля выбранные по CUSTOM_FIELD_CODES поля в контакт, если они есть и не пустые
+             * Добавляем кастомные поля выбранные по $customFieldCodes поля в контакт, если они есть и не пустые
              */
             foreach ($bufferContact['custom_fields_values'] as $custom_field) {
                 if (isset($customFieldCodes[$custom_field['field_code']]) && !empty($custom_field['values'][0]['value'])) {
@@ -72,15 +76,15 @@ class ContactsService
             }
 
             /**
-             * Добавляем обычные поля выбранные по FIELDS поля в контакт, если они есть и не пустые
+             * Добавляем обычные поля выбранные по $fields поля в контакт, если они есть и не пустые
              */
-            foreach ($fields as $field => $field_code) {
-                if (isset($bufferContact[$field]) && !empty($bufferContact[$field])) {
-                    $contacts[$key][$field_code] = $bufferContact[$field];
+            foreach ($fields as $fieldKey => $fieldValue) {
+                if (isset($bufferContact[$fieldKey]) && !empty($bufferContact[$fieldKey])) {
+                    $contacts[$key][$fieldValue] = $bufferContact[$fieldKey];
                 }
             }
 
-            if (isset($fields['email'])) {
+            if (isset($fieldsMultiVal['email'])) {
                 /**
                  * Добавляем множество email'ов в контакт
                  */

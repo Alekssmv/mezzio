@@ -36,9 +36,12 @@ class ConfigProvider
     public function getDependencies(): array
     {
         return [
+            'aliases' => [
+                Interfaces\ContactsServiceInterface::class => Services\ContactsService::class,
+            ],
             'invokables' => [
                 Handler\PingHandler::class => Handler\PingHandler::class,
-               
+
             ],
             'factories' => [
                 Factory\AmoCRMApiClientFactory::class => Factory\AmoCRMApiClientFactory::class,
