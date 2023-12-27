@@ -10,8 +10,15 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+/*
+ * Обработчик для создания пользователя, принимает имя пользователя (name) в параметрах запроса
+ * Возвращает созданного пользователя
+ */
 class CreateUserHandler implements RequestHandlerInterface
 {
+    /**
+     * @var UserService - сервис для работы с таблицей бд users
+     */
     private UserService $userService;
 
     public function __construct(

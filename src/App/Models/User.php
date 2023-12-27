@@ -6,6 +6,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Модель для работы с таблицей users
+ */
 class User extends Model
 {
     protected $table = 'users';

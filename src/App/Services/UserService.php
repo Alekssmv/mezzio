@@ -15,7 +15,11 @@ class UserService
     ) {
         $this->userRepository = $userRepository;
     }
-
+    /**
+     * Создает пользователя с указанным именем в БД
+     * @param string $name - имя пользователя
+     * @return User
+     */
     public function create(string $name): User
     {
         return $this->userRepository->create($name);
