@@ -31,7 +31,7 @@ class ContactsService implements ContactsServiceInterface
      *  ];
      * @return array - отформатированные контакты
      */
-    public function formatContacts(array $contacts, array $customFieldNames, array $fields, array $fieldsMultiVal = []): array
+    public function formatContacts(array $contacts, array $customFieldNames, array $fields, array $fieldsMultiVal): array
     {
         foreach ($contacts as $key => $contact) {
 
@@ -173,5 +173,21 @@ class ContactsService implements ContactsServiceInterface
             }
         }
         return $data;
+    }
+
+    /**
+     * Возвращает параметр field_names для отправки в Unisender
+     * @param array $fields
+     * @param array $customFieldNames
+     * @param array $fieldsMultiVal
+     * @return array
+     */
+    public function getFieldNames(array $fields, array $customFieldNames, array $fieldsMultiVal): array
+    {
+        $multiValNames = array_map(function ($field) {
+            return $field['name'];
+        }, $fieldsMultiVal);
+
+        return array_merge(array_values($customFieldNames), array_values($fields), array_values($multiValNames));
     }
 }
