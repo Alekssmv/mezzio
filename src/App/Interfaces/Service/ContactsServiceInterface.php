@@ -18,4 +18,6 @@ interface ContactsServiceInterface
     public function getDataForUnisender(array $contacts, array $fieldNames): array;
 
     public function getFieldNames(array $fields, array $customFieldNames, array $fieldsMultiVal): array;
+    
+    public function addFieldsToContacts(array $contacts, array $data): array;
 }

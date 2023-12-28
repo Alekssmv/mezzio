@@ -119,7 +119,7 @@ class GetTokenHandler implements RequestHandlerInterface
                             'accessToken' => $accessToken->getToken(),
                             'refreshToken' => $accessToken->getRefreshToken(),
                             'expires' => $accessToken->getExpires(),
-                            'baseDomain' => $accessToken->getValues()['baseDomain']
+                            'baseDomain' => $params['referer']
                         ]
                     )
                 );
