@@ -46,4 +46,5 @@ return static function (Application $app, MiddlewareFactory $factory, ContainerI
     $app->get($apiPrefix . '/contacts', App\Handler\GetContactsHandler::class, 'api.contacts');
     $app->get($apiPrefix . '/unisender-contact', App\Handler\UnisenderContactHandler::class, 'api.unisender-contact');
     $app->get($apiPrefix . '/send-contacts-to-unisender', App\Handler\SendContactsToUnisenderHandler::class, 'api.send-contacts-to-unisender');
+    $app->get($apiPrefix . '/create-user', App\Handler\CreateUserHandler::class, 'api.create-user');
 };

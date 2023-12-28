@@ -32,6 +32,7 @@ class UnisenderContactHandler implements RequestHandlerInterface
         $unisenderApiClient = $this->unisenderApiClient;
 
         $contact = $unisenderApiClient->getContact(['email' => 'test@test.com']);
+        
         return new JsonResponse($contact);
     }
 }
