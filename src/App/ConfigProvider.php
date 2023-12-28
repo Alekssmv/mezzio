@@ -31,6 +31,9 @@ class ConfigProvider
     public function getDependencies(): array
     {
         return [
+            'aliases' => [
+                Interfaces\Service\AccountServiceInterface::class => Factory\AccountServiceFactory::class,
+            ],
             'invokables' => [
                 Handler\PingHandler::class => Handler\PingHandler::class,
             ],
@@ -39,7 +42,6 @@ class ConfigProvider
                 Factory\UnisenderApiClientFactory::class => Factory\UnisenderApiClientFactory::class,
                 Factory\UserServiceFactory::class => Factory\UserServiceFactory::class,
                 Factory\AccountServiceFactory::class => Factory\AccountServiceFactory::class,
-                Factory\TokenServiceFactory::class => Factory\TokenServiceFactory::class,
 
                 Handler\HomePageHandler::class => Factory\HomePageHandlerFactory::class,
                 Handler\SumHandler::class => Factory\SumHandlerFactory::class,

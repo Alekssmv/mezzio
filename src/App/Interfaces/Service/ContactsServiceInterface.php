@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Interfaces;
+namespace App\Interfaces\Service;
 
 /**
  * Интерфейс для сервиса, для работы с контактами

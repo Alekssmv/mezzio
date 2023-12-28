@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Factory;
 
 use App\Handler\GetUniApiKeyHandler;
+use App\Interfaces\Service\AccountServiceInterface;
 use Psr\Container\ContainerInterface;
 
 class GetUniApiKeyHandlerFactory
@@ -13,7 +14,7 @@ class GetUniApiKeyHandlerFactory
     {
         return new GetUniApiKeyHandler(
             $container->get(AmoCRMApiClientFactory::class),
-            $container->get(AccountServiceFactory::class),
+            $container->get(AccountServiceInterface ::class),
         );
     }
 }

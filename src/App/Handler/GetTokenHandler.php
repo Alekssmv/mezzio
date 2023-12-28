@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
-use App\Services\TokenService;
+use App\Services\AccountService;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Exception;
-use App\Helper\TokenActions;
+use League\OAuth2\Client\Token\AccessToken;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
@@ -21,15 +21,16 @@ class GetTokenHandler implements RequestHandlerInterface
     private AmoCRMApiClient $apiClient;
 
     /**
-     * @var TokenService - сервис для работы с токенами
+     * @var AccountService - сервис для работы с аккаунтами
      */
-    private TokenService $tokenService;
+    private AccountService $accountService;
+
     public function __construct(
         AmoCRMApiClient $apiClient,
-        TokenService $tokenService
+        AccountService $accountService
     ) {
         $this->apiClient = $apiClient;
-        $this->tokenService = $tokenService;
+        $this->accountService = $accountService;
     }
     /**
      * Сохраняет токен в TOKEN_FILE локально, если он еще не получен или истек
@@ -43,14 +44,21 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
-        $tokenService = $this->tokenService;
+        $accountService = $this->accountService;
 
         /**
          * Полчаем токен по url параметру account_id
          */
-        if (isset($params['account_id'])) {
-            $accessToken = TokenActions::getToken((int) $params['account_id']);
-        } else {
+        try {
+            $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
+            $accessToken = json_decode((string) $accessToken, true);
+            $accessToken = new AccessToken([
+                'access_token' => $accessToken['accessToken'],
+                'refresh_token' => $accessToken['refreshToken'],
+                'expires' => $accessToken['expires'],
+                'base_domain' => $accessToken['baseDomain']
+            ]);
+        } catch (Exception $e) {
             $accessToken = null;
         }
 
@@ -103,14 +111,17 @@ class GetTokenHandler implements RequestHandlerInterface
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
             $accountId = $apiClient->setAccessToken($accessToken)->account()->getCurrent()->toArray()['id'];
             if (!$accessToken->hasExpired()) {
-                TokenActions::saveToken(
+                $accountService->findOrCreate((int) $accountId);
+                $accountService->addAmoToken(
                     $accountId,
-                    [
-                        'accessToken' => $accessToken->getToken(),
-                        'refreshToken' => $accessToken->getRefreshToken(),
-                        'expires' => $accessToken->getExpires(),
-                        'baseDomain' => $apiClient->getAccountBaseDomain(),
-                    ]
+                    json_encode(
+                        [
+                            'accessToken' => $accessToken->getToken(),
+                            'refreshToken' => $accessToken->getRefreshToken(),
+                            'expires' => $accessToken->getExpires(),
+                            'baseDomain' => $accessToken->getValues()['baseDomain']
+                        ]
+                    )
                 );
             }
         } catch (Exception $e) {

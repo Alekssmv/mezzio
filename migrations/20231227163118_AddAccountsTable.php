@@ -1,6 +1,10 @@
 <?php
 
+require __DIR__ . '/../phpmig.php';
+
+use Illuminate\Database\Capsule\Manager as Capsule;
 use Phpmig\Migration\Migration;
+use Illuminate\Database\Schema\Blueprint;
 
 class AddAccountsTable extends Migration
 {
@@ -9,11 +13,10 @@ class AddAccountsTable extends Migration
      */
     public function up()
     {
-        $container = $this->getContainer();
-        $db = $container['db']($container);
-        $db->schema()->create('accounts', function ($table) {
-            $table->integer('account_id');
-            $table->string('unisender_key');
+        Capsule::schema()->create('accounts', function (Blueprint $table) {
+            $table->integer('account_id')->primary();
+            $table->string('unisender_api_key')->unique()->nullable();
+            $table->text('amo_access_jwt')->nullable();
             $table->timestamps();
         });
     }
@@ -23,8 +26,6 @@ class AddAccountsTable extends Migration
      */
     public function down()
     {
-        $container = $this->getContainer();
-        $db = $container['db']($container);
-        $db->schema()->drop('accounts');
+        Capsule::schema()->dropIfExists('accounts');
     }
 }

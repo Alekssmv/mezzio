@@ -30,4 +30,56 @@ class AccountRepository implements AccountRepositoryInterface
         $this->account->save();
         return $this->account;
     }
+
+    /**
+     * Ищет аккаунт по account_id
+     * @param int $accountId
+     * @return Account|null
+     */
+    public function findByAccountId(int $accountId): ?Account
+    {
+        return $this->account->where('account_id', $accountId)->first();
+    }
+
+    /**
+     * Ищет аккаунт по account_id, если не находит - создает
+     * @param int $accountId
+     * @return Account
+     */
+    public function findOrCreate(int $accountId): Account
+    {
+        $account = $this->findByAccountId($accountId);
+        if (!$account) {
+            $account = $this->create(['account_id' => $accountId]);
+        }
+        return $account;
+    }
+
+    /**
+     * Добавляет jwt токен в запись аккаунта
+     * @param int $accountId
+     * @param string $token
+     * @return Account
+     */
+    public function addAmoToken(int $accountId, string $token): Account
+    {
+        $account = $this->findByAccountId($accountId);
+        $account->amo_access_jwt = $token;
+        $account->save();
+        return $account;
+    }
+
+    /**
+     * Добавляет unisender_api_key в запись аккаунта
+     * @param int $accountId
+     * @param string $apiKey
+     * @return Account
+     */
+    public function addUnisenderApiKey(int $accountId, string $apiKey): Account
+    {
+        $account = $this->findByAccountId($accountId);
+        $account->unisender_api_key = $apiKey;
+        $account->save();
+        return $account;
+    }
 }

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Interfaces\Repository;
+namespace App\Interfaces\Service;
 
 use App\Models\Account;
 
 /**
  * Интерфейс для репозитория аккаунтов
  */
-interface AccountRepositoryInterface
+interface AccountServiceInterface
 {
     /**
      * Принимает массив данных для создания аккаунта,

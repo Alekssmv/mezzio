@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Account extends Model
 {
+    protected $primaryKey = 'account_id';
     protected $table = 'accounts';
-    protected $fillable = ['account_id', 'unisender_key'];
+    protected $fillable = ['account_id', 'unisender_api_key', 'amo_access_jwt'];
 }
