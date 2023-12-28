@@ -34,7 +34,7 @@ interface AccountServiceInterface
     /**
      * Добавляет jwt токен в запись аккаунта
      * @param int $accountId
-     * @param string $token
+     * @param string $token - json web token
      * @return Account
      */
     public function addAmoToken(int $accountId, string $token): Account;
