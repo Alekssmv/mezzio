@@ -34,6 +34,7 @@ class CreateUserHandler implements RequestHandlerInterface
         }
         $name = $params['name'];
         $user = $this->userService->create($name);
+        
         return new JsonResponse(['user' => $user]);
     }
 }
