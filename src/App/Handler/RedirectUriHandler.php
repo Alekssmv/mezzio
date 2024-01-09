@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
+use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -39,7 +40,9 @@ class RedirectUriHandler implements RequestHandlerInterface
             $ownerDetails = $this->apiClient->getOAuthClient()->getResourceOwner($accessToken);
             $data = $ownerDetails->toArray();
         } catch (Exception $e) {
-            echo $e->getMessage();
+            return new JsonResponse([
+                'error' => $e->getMessage(),
+            ]);
         }
         
         return new HtmlResponse(

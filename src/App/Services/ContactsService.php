@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Interfaces\ContactsServiceInterface;
+use App\Interfaces\Service\ContactsServiceInterface;
 
 /**
  * Сервис, для работы с контактами
