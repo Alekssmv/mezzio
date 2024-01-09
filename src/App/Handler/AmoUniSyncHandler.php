@@ -11,9 +11,11 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Unisender\ApiWrapper\UnisenderApi;
-use App\Services\ContactsService;
+use App\Services\ContactFormatterService;
 use Exception;
 use League\OAuth2\Client\Token\AccessToken;
+use App\Services\ContactService;
+use App\Helper\ArrayHelper;
 
 class AmoUniSyncHandler implements RequestHandlerInterface
 {
@@ -29,9 +31,9 @@ class AmoUniSyncHandler implements RequestHandlerInterface
     private $unisenderApi;
 
     /**
-     * @var ContactsService
+     * @var ContactFormatterService
      */
-    private $contactsService;
+    private $contactFormatterService;
 
     /**
      * @var AccountService
@@ -43,16 +45,23 @@ class AmoUniSyncHandler implements RequestHandlerInterface
      */
     private $amoApiClient;
 
+    /**
+     * @var ContactService
+     */
+    private $contactService;
+
     public function __construct(
         UnisenderApi $unisenderApi,
-        ContactsService $contactsService,
+        ContactFormatterService $contactFormatterService,
         AccountService $accountService,
-        AmoCRMApiClient $amoApiClient
+        AmoCRMApiClient $amoApiClient,
+        ContactService $contactService
     ) {
         $this->unisenderApi = $unisenderApi;
-        $this->contactsService = $contactsService;
+        $this->contactFormatterService = $contactFormatterService;
         $this->accountService = $accountService;
         $this->amoApiClient = $amoApiClient;
+        $this->contactService = $contactService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -68,18 +77,34 @@ class AmoUniSyncHandler implements RequestHandlerInterface
         $unisenderApi = $this->unisenderApi;
 
         /**
-         * @var ContactsService $contactsService
+         * @var ContactFormatterService $contactFormatterService
          */
-        $contactsService = $this->contactsService;
+        $contactFormatterService = $this->contactFormatterService;
+
+        /**
+         * @var ContactService $contactService
+         */
+        $contactService = $this->contactService;
+
         $uniApiKey = null;
-        $contacts = [];
+        $contactsBuff = [];
         $contactsToDel = [];
+
+        /**
+         * Получаем контакты из запроса и действия, которое нужно с ними сделать
+         */
         $params = $request->getParsedBody();
 
+        /**
+         * Проверяем, что в запросе есть нужные параметры
+         */
         if (!isset($params['account']) && !isset($params['contacts'])) {
             return new JsonResponse(['error' => 'Invalid request'], 400);
         }
 
+        /**
+         * Устанавливаем accessToken для AmoCRM
+         */
         try {
             $account = $this->accountService->findByAccountId((int) $params['account']['id']);
             $uniApiKey = $account->unisender_api_key;
@@ -99,20 +124,54 @@ class AmoUniSyncHandler implements RequestHandlerInterface
             return new JsonResponse(['error' => $e->getMessage()], 400);
         }
 
+        /**
+         * Обрабатываем контакты
+         */
         foreach ($params['contacts'] as $action => $contacts) {
-            // if ($action === 'delete') {
-            //     $contactsToDel = $contactsService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL);
-            //     $contactsToDel = $contactsService->filterContacts($contacts, REQ_FIELDS);
-            //     $contactsToDel = $contactsService->dublicateContacts($contacts, REQ_FIELDS);
-            // }
-            $contacts = $contactsService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL);
-            $contacts = $contactsService->filterContacts($contacts, REQ_FIELDS);
-            $contacts = $contactsService->dublicateContacts($contacts, REQ_FIELDS);
+            /**
+             * Обработка для добавления контактов
+             */
+            if ($action === 'add') {
+                $contacts = $contactFormatterService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL);
+                $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
+                $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
+                $contactService->createOrUpdateMany($contacts);
+                $contactsBuff = array_merge($contactsBuff, $contacts);
+            /**
+             * Обработка для обновления контактов
+             */
+            } elseif ($action === 'update') {
+                $contacts = $contactFormatterService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL);
+                $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
+
+                $newEmails = array_column($contacts, 'email', 'id');
+                $oldEmails = $contactService->getEmails(array_column($contacts, 'id'));
+                $emailsToRemove = ArrayHelper::arrayDiffRecursive($oldEmails, $newEmails);
+                
+                $contactsToDel = $contactFormatterService->prepareContactsForDelete($contacts, $emailsToRemove);
+                $contactService->deleteEmails($emailsToRemove);
+                $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
+                $contactService->createOrUpdateMany($contacts);
+                $contactsBuff = array_merge($contactsBuff, $contacts, $contactsToDel);
+            /**
+             * Обработка для удаления контактов
+             */
+            } elseif ($action === 'delete') {
+                $ids = array_column($contacts, 'id');
+                $emails = $contactService->getEmails($ids);
+                $contactsToDel = $contactFormatterService->prepareContactsForDelete($contacts, $emails);
+                $contactService->deleteMany($ids);
+                $contactsBuff = array_merge($contactsBuff, $contactsToDel);
+            }
         }
 
-        $fieldNames = $contactsService->getFieldNames(CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL);
-        $data = $contactsService->getDataForUnisender($contacts, $fieldNames);
+        /**
+         * Удаляем из массива контактов id, т.к. он не нужен для импорта в Unisender
+         */
+        $contactsBuff = $contactFormatterService->removeFieldsFromContacts($contactsBuff, ['id']);
 
+        $fieldNames = $contactFormatterService->getFieldNames(CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL);
+        $data = $contactFormatterService->getDataForUnisender($contactsBuff, $fieldNames);
         $params = [
             'format' => 'json',
             'api_key' => $uniApiKey,
@@ -120,8 +179,8 @@ class AmoUniSyncHandler implements RequestHandlerInterface
             'data' => $data,
         ];
 
-        $unisenderApi->importContacts($params);
+        $response = $unisenderApi->importContacts($params);
 
-        return new JsonResponse(['success' => 'true']);
+        return new JsonResponse(['success' => $response], 200);
     }
 }

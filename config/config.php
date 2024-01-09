@@ -14,10 +14,12 @@ define('CUSTOM_FIELD_NAMES', [
 ]);
 define('FIELDS', [
     'name' => 'Name',
+    'id' => 'id',
+    'delete' => 'delete',
 ]);
 define('FIELDS_MULTI_VAL', [
     'Email' => [
-        "enum" => "460935",
+        "enum" => "93498",
         'name' => 'email'
     ]
 ]);

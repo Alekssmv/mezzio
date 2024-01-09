@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Interfaces\Service\ContactsServiceInterface;
+use App\Interfaces\Service\ContactFormatterServiceInterface;
 
 /**
  * Сервис, для работы с контактами
  */
-class ContactsService implements ContactsServiceInterface
+class ContactFormatterService implements ContactFormatterServiceInterface
 {
 
     /**
@@ -47,8 +47,7 @@ class ContactsService implements ContactsServiceInterface
             }
 
             $customFieldName = 'field_name';
-            if (!isset($bufferContact[$customFieldsKey][0][$customFieldName]))
-            {
+            if (!isset($bufferContact[$customFieldsKey][0][$customFieldName])) {
                 $customFieldName = 'name';
             }
 
@@ -219,5 +218,41 @@ class ContactsService implements ContactsServiceInterface
             }
         }
         return $contacts;
+    }
+
+    /**
+     * Удаляет поля из форматированных контактов
+     */
+    public function removeFieldsFromContacts(array $contacts, array $fields): array
+    {
+        foreach ($contacts as $key => $contact) {
+            foreach ($fields as $field) {
+                unset($contacts[$key][$field]);
+            }
+        }
+        return $contacts;
+    }
+
+    /**
+     * Возвращает массив с контактами, которые нужно удалить
+     */
+    public function prepareContactsForDelete(array $contacts, array $emails): array
+    {
+        $contactsToDel = [];
+        foreach ($emails as $id => $emails) {
+            foreach ($emails as $email) {
+                foreach ($contacts as $contact) {
+                    if ((int) $contact['id'] === $id) {
+                        $contactsToDel[] = [
+                            'id' => $contact['id'],
+                            'email' => $email,
+                            'delete' => 1,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return $contactsToDel;
     }
 }
