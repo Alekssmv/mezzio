@@ -8,21 +8,40 @@ use Laminas\ConfigAggregator\PhpFileProvider;
 use Mezzio\Helper\ConfigProvider;
 
 define('ROOT_DIR', __DIR__ . '/..');
+
+/**
+ * Имена кастомных полей, которые будут добавлены в элементы массива $contacts перед отправкой в Unisender.
+ * Ключ - имя кастомного поля. Значение - ключ, который добавится в элемент $contacts.
+ */
 define('CUSTOM_FIELD_NAMES', [
     'Телефон' => 'phone',
     'Должность' => 'job_title',
 ]);
+
+/**
+ * Обычные поля, которые будут добавлены в элементы массива $contacts перед отправкой в Unisender
+ * Ключ - имя поля. Значение - ключ, который добавится в элемент $contacts.
+ */
 define('FIELDS', [
     'name' => 'Name',
     'delete' => 'delete',
     'id' => 'id',
 ]);
+
+/**
+ * Поля которые будут содержать множество значений
+ * Ключ - имя поля (field_name). 'enum_code' - признак по которому будут добавляться поля. 'name' - поле, которое добавится в элемент $contacts
+ */
 define('FIELDS_MULTI_VAL', [
     'Email' => [
         "enum" => "113196",
         'name' => 'email'
     ]
 ]);
+
+/**
+ * Обязательные поля, которые должны быть в элементах массива $contacts перед отправкой в Unisender
+ */
 define('REQ_FIELDS', [
     'email' => 'email'
 ]);

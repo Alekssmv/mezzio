@@ -149,7 +149,14 @@ class AmoUniSyncHandler implements RequestHandlerInterface
              * Обработка для добавления контактов
              */
             if ($action === 'add') {
-                $contacts = $contactFormatterService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL);
+                $contacts = $contactFormatterService->formatContacts($contacts, [
+                    'Телефон' => 'phone',
+                    'Должность' => 'job_title',
+                ], [
+                    'name' => 'Name',
+                    'delete' => 'delete',
+                    'id' => 'id',
+                ], FIELDS_MULTI_VAL);
                 $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
                 $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
                 $contactsBuff = array_merge($contactsBuff, $contacts);
