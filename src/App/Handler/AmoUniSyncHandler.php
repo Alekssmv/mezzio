@@ -110,7 +110,6 @@ class AmoUniSyncHandler implements RequestHandlerInterface
             return new JsonResponse(['error' => 'Contacts are empty'], 400);
         }
 
-
         try {
             $account = $this->accountService->findOrCreate((int) $params['account']['id']);
             $uniApiKey = $account->unisender_api_key;
@@ -145,6 +144,7 @@ class AmoUniSyncHandler implements RequestHandlerInterface
          * Обрабатываем контакты
          */
         foreach ($params['contacts'] as $action => $contacts) {
+
             /**
              * Обработка для добавления контактов
              */
@@ -180,7 +180,6 @@ class AmoUniSyncHandler implements RequestHandlerInterface
                 $ids = array_column($contacts, 'id');
                 $emails = $contactService->getEmails($ids);
                 $contactsToDel = $contactFormatterService->prepareContactsForDelete($contacts, $emails);
-                // $contactService->deleteMany($ids);
                 $contactsBuff = array_merge($contactsBuff, $contactsToDel);
             }
         }
@@ -211,7 +210,6 @@ class AmoUniSyncHandler implements RequestHandlerInterface
             }
         }
         $indexesToSkip = array_flip($indexesToSkip);
-
 
         /**
          * Добавляем и удаляем контакты, в которых не произошло ошибки
