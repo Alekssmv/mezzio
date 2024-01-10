@@ -34,7 +34,7 @@ class ContactFormatterService implements ContactFormatterServiceInterface
     public function formatContacts(array $contacts, array $customFieldNames, array $fields, array $fieldsMultiVal): array
     {
         foreach ($contacts as $key => $contact) {
-
+            
             /**
              * Создаем буферный контакт, чтобы не потерять данные
              */
@@ -50,7 +50,7 @@ class ContactFormatterService implements ContactFormatterServiceInterface
             if (!isset($bufferContact[$customFieldsKey][0][$customFieldName])) {
                 $customFieldName = 'name';
             }
-
+            
             if ($bufferContact[$customFieldsKey] !== null) {
                 /**
                  * Добавляем кастомные поля выбранные по $customFieldNames поля в контакт, если они есть и не пустые
@@ -63,7 +63,8 @@ class ContactFormatterService implements ContactFormatterServiceInterface
                         $contacts[$key][$customFieldNames[$customField[$customFieldName]]] = $customField['values'][0]['value'];
                     }
                 }
-
+                
+                
                 /*
                  * Добавляем поля с множественными значениями выбранные по $fieldsMultiVal поля в контакт
                  */
@@ -82,7 +83,7 @@ class ContactFormatterService implements ContactFormatterServiceInterface
                     }
                 }
             }
-
+            
             /**
              * Добавляем обычные поля выбранные по $fields поля в контакт, если они есть и не пустые
              */

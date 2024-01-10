@@ -67,7 +67,7 @@ class ContactService
     }
 
     /**
-     * Удаляет email из записи контакта
+     * Удаляет email'ы из записи контакта
      * @param array $data - массив в формате [id => [email1, email2]]
      * @return void
      */
@@ -78,5 +78,16 @@ class ContactService
                 $this->contactRepository->deleteEmail($email, (int) $id);
             }
         }
+    }
+
+    /**
+     * Удаляет email из записи контакта
+     * @param string $email
+     * @param int $id - id контакта
+     * @return void
+     */
+    public function deleteEmail(string $email, int $id): void
+    {
+        $this->contactRepository->deleteEmail($email, $id);
     }
 }

@@ -6,12 +6,14 @@ namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
 use App\Services\AccountService;
+use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Exception;
 use League\OAuth2\Client\Token\AccessToken;
+use AmoCRM\Models\WebhookModel;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
@@ -45,28 +47,45 @@ class GetTokenHandler implements RequestHandlerInterface
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
         $accountService = $this->accountService;
+        $accessToken = null;
 
         /**
          * Полчаем токен по url параметру account_id
          */
         try {
-            $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
-            $accessToken = json_decode((string) $accessToken, true);
-            $accessToken = new AccessToken([
-                'access_token' => $accessToken['accessToken'],
-                'refresh_token' => $accessToken['refreshToken'],
-                'expires' => $accessToken['expires'],
-                'base_domain' => $accessToken['baseDomain']
-            ]);
+            if ($params['account_id'] !== null) {
+                $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
+                $accessToken = json_decode((string) $accessToken, true);
+                $accessToken = new AccessToken([
+                    'access_token' => $accessToken['accessToken'],
+                    'refresh_token' => $accessToken['refreshToken'],
+                    'expires' => $accessToken['expires'],
+                    'base_domain' => $accessToken['baseDomain']
+                ]);
+            }
         } catch (Exception $e) {
-            $accessToken = null;
+            return new JsonResponse(['error' => $e->getMessage()], 500);
         }
 
         /**
          * Если токен есть и он не истек, то редиректим на /redirect-uri с параметром account_id
          */
         if ($accessToken !== null && !$accessToken->hasExpired()) {
-            return new RedirectResponse('/redirect-uri' . '?account_id=' . $params['account_id']);
+
+            /**
+             * Устанавливаем вебхук
+             */
+            $apiClient->setAccessToken($accessToken);
+            $apiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
+
+            if ($apiClient->webhooks()->get() === null) {
+                $webhookModel = new WebhookModel();
+                $webhookModel->setDestination($_ENV['NGROK_HOSTNAME'] . '/api/v1/amo-uni-sync');
+                $webhookModel->setSettings(['add_contact', 'update_contact', 'delete_contact']);
+                $apiClient->webhooks()->subscribe($webhookModel);
+            }
+
+            return new JsonResponse(['success' => true]);
         }
 
         if (isset($params['referer'])) {
@@ -109,7 +128,19 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         try {
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
-            $accountId = $apiClient->setAccessToken($accessToken)->account()->getCurrent()->toArray()['id'];
+            $apiClient->setAccessToken($accessToken);
+
+            /**
+             * Устанавливаем вебхук
+             */
+            if ($apiClient->webhooks()->get() === null) {
+                $webhookModel = new WebhookModel();
+                $webhookModel->setDestination($_ENV['NGROK_HOSTNAME'] . '/api/v1/amo-uni-sync');
+                $webhookModel->setSettings(['add_contact', 'update_contact', 'delete_contact']);
+                $apiClient->webhooks()->subscribe($webhookModel);
+            }
+
+            $accountId = $apiClient->account()->getCurrent()->toArray()['id'];
             if (!$accessToken->hasExpired()) {
                 $accountService->findOrCreate((int) $accountId);
                 $accountService->addAmoToken(
@@ -128,6 +159,6 @@ class GetTokenHandler implements RequestHandlerInterface
             die((string) $e);
         }
 
-        return new RedirectResponse('/redirect-uri' . '?account_id=' . $accountId);
+        return new JsonResponse(['success' => true]);
     }
 }
