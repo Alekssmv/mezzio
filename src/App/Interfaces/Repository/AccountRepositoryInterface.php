@@ -46,4 +46,12 @@ interface AccountRepositoryInterface
      * @return Account
      */
     public function addUnisenderApiKey(int $accountId, string $apiKey): Account;
+
+    /**
+     * Добавляет enum_codes в запись аккаунта
+     * @param int $accountId
+     * @param string $enumCodes
+     * @return Account
+     */
+    public function addEnumCodes(int $accountId, string $enumCodes): Account;
 }

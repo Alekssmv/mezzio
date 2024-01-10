@@ -82,4 +82,18 @@ class AccountRepository implements AccountRepositoryInterface
         $account->save();
         return $account;
     }
+
+    /**
+     * Добавляет enum_codes в запись аккаунта
+     * @param int $accountId
+     * @param string $enumCodes
+     * @return Account
+     */
+    public function addEnumCodes(int $accountId, string $enumCodes): Account
+    {
+        $account = $this->findByAccountId($accountId);
+        $account->enum_codes = $enumCodes;
+        $account->save();
+        return $account;
+    }
 }

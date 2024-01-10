@@ -92,6 +92,7 @@ class AmoUniSyncHandler implements RequestHandlerInterface
         $contactService = $this->contactService;
 
         $uniApiKey = null;
+        $account = null;
         $contactsBuff = [];
         $contactsToDel = [];
 
@@ -139,6 +140,21 @@ class AmoUniSyncHandler implements RequestHandlerInterface
         } catch (Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], 400);
         }
+
+        $emailEnumCodes = json_decode($account->enum_codes, true)['enums']['email'];
+        dd($emailEnumCodes);
+        $emailEnumIds = [];
+        $customFields = $amoApiClient->customFields('contacts')->get();
+        $emailCustomFields = null;
+        foreach ($customFields as $customField) {
+            if ($customField->getName() === 'Email') {
+                $emailCustomFields = $customField;
+            }
+        }
+        foreach ($emailCustomFields as $emailCustomField) {
+        }
+
+
 
         /**
          * Обрабатываем контакты
