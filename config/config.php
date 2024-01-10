@@ -7,6 +7,45 @@ use Laminas\ConfigAggregator\ConfigAggregator;
 use Laminas\ConfigAggregator\PhpFileProvider;
 use Mezzio\Helper\ConfigProvider;
 
+define('ROOT_DIR', __DIR__ . '/..');
+
+/**
+ * Имена кастомных полей, которые будут добавлены в элементы массива $contacts перед отправкой в Unisender.
+ * Ключ - имя кастомного поля. Значение - ключ, который добавится в элемент $contacts.
+ */
+define('CUSTOM_FIELD_NAMES', [
+    'Телефон' => 'phone',
+    'Должность' => 'job_title',
+]);
+
+/**
+ * Обычные поля, которые будут добавлены в элементы массива $contacts перед отправкой в Unisender
+ * Ключ - имя поля. Значение - ключ, который добавится в элемент $contacts.
+ */
+define('FIELDS', [
+    'name' => 'Name',
+    'delete' => 'delete',
+    'id' => 'id',
+]);
+
+/**
+ * Поля которые будут содержать множество значений
+ * Ключ - имя поля (field_name). 'enum_code' - признак по которому будут добавляться поля. 'name' - поле, которое добавится в элемент $contacts
+ */
+define('FIELDS_MULTI_VAL', [
+    'Email' => [
+        "enum" => "113196",
+        'name' => 'email'
+    ]
+]);
+
+/**
+ * Обязательные поля, которые должны быть в элементах массива $contacts перед отправкой в Unisender
+ */
+define('REQ_FIELDS', [
+    'email' => 'email'
+]);
+
 // To enable or disable caching, set the `ConfigAggregator::ENABLE_CACHE` boolean in
 // `config/autoload/local.php`.
 $cacheConfig = [
@@ -27,11 +66,11 @@ $aggregator = new ConfigAggregator([
     \Laminas\Diactoros\ConfigProvider::class,
     // Swoole config to overwrite some services (if installed)
     class_exists(\Mezzio\Swoole\ConfigProvider::class)
-        ? \Mezzio\Swoole\ConfigProvider::class
-        : function (): array {
-            return [];
-        },
-    // Default App module config
+    ? \Mezzio\Swoole\ConfigProvider::class
+    : function (): array {
+        return [];
+    },
+        // Default App module config
     App\ConfigProvider::class,
     // Load application config in a pre-defined order in such a way that local settings
     // overwrite global settings. (Loaded as first to last):

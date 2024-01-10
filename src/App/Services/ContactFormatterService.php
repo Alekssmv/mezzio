@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Interfaces\Service\ContactsServiceInterface;
+use App\Interfaces\Service\ContactFormatterServiceInterface;
 
 /**
  * Сервис, для работы с контактами
  */
-class ContactsService implements ContactsServiceInterface
+class ContactFormatterService implements ContactFormatterServiceInterface
 {
 
     /**
@@ -34,49 +34,62 @@ class ContactsService implements ContactsServiceInterface
     public function formatContacts(array $contacts, array $customFieldNames, array $fields, array $fieldsMultiVal): array
     {
         foreach ($contacts as $key => $contact) {
-
+            
             /**
              * Создаем буферный контакт, чтобы не потерять данные
              */
             $bufferContact = $contact;
             unset($contacts[$key]);
 
-            /**
-             * Добавляем кастомные поля выбранные по $customFieldNames поля в контакт, если они есть и не пустые
-             */
-            foreach ($bufferContact['custom_fields_values'] as $customField) {
-                if (
-                    isset($customFieldNames[$customField['field_name']]) &&
-                    !empty($customField['values'][0]['value'])
-                ) {
-                    $contacts[$key][$customFieldNames[$customField['field_name']]] = $customField['values'][0]['value'];
-                }
+            $customFieldsKey = 'custom_fields_values';
+            if (!isset($bufferContact[$customFieldsKey])) {
+                $customFieldsKey = 'custom_fields';
             }
 
+            $customFieldName = 'field_name';
+            if (!isset($bufferContact[$customFieldsKey][0][$customFieldName])) {
+                $customFieldName = 'name';
+            }
+            
+            if ($bufferContact[$customFieldsKey] !== null) {
+                /**
+                 * Добавляем кастомные поля выбранные по $customFieldNames поля в контакт, если они есть и не пустые
+                 */
+                foreach ($bufferContact[$customFieldsKey] as $customField) {
+                    if (
+                        isset($customFieldNames[$customField[$customFieldName]]) &&
+                        !empty($customField['values'][0]['value'])
+                    ) {
+                        $contacts[$key][$customFieldNames[$customField[$customFieldName]]] = $customField['values'][0]['value'];
+                    }
+                }
+                
+                
+                /*
+                 * Добавляем поля с множественными значениями выбранные по $fieldsMultiVal поля в контакт
+                 */
+                foreach ($fieldsMultiVal as $fieldKey => $fieldValue) {
+                    foreach ($bufferContact[$customFieldsKey] as $customField) {
+                        if (
+                            $customField[$customFieldName] === $fieldKey &&
+                            isset($customField['values'])
+                        ) {
+                            foreach ($customField['values'] as $value) {
+                                if ($value['enum'] === $fieldValue['enum']) {
+                                    $contacts[$key][$fieldValue['name']][] = $value['value'];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
             /**
              * Добавляем обычные поля выбранные по $fields поля в контакт, если они есть и не пустые
              */
             foreach ($fields as $fieldKey => $fieldValue) {
                 if (isset($bufferContact[$fieldKey]) && !empty($bufferContact[$fieldKey])) {
                     $contacts[$key][$fieldValue] = $bufferContact[$fieldKey];
-                }
-            }
-
-            /*
-             * Добавляем поля с множественными значениями выбранные по $fieldsMultiVal поля в контакт
-             */
-            foreach ($fieldsMultiVal as $fieldKey => $fieldValue) {
-                foreach ($bufferContact['custom_fields_values'] as $customField) {
-                    if (
-                        $customField['field_name'] === $fieldKey &&
-                        isset($customField['values'])
-                    ) {
-                        foreach ($customField['values'] as $value) {
-                            if ($value['enum_code'] === $fieldValue['enum_code']) {
-                                $contacts[$key][$fieldValue['name']][] = $value['value'];
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -189,5 +202,58 @@ class ContactsService implements ContactsServiceInterface
         }, $fieldsMultiVal);
 
         return array_merge(array_values($customFieldNames), array_values($fields), array_values($multiValNames));
+    }
+
+    /**
+     * Принимает массив отформатированных контактов
+     * Добавляет данные из массива $data в массив $contacts
+     * @param array $contacts - отформатированные контакты
+     * @param array $data - данные, которые нужно добавить в контакты
+     * @return array - контакты с добавленными данными
+     */
+    public function addFieldsToContacts(array $contacts, array $data): array
+    {
+        foreach ($contacts as $key => $contact) {
+            foreach ($data as $dataKey => $dataValue) {
+                $contacts[$key][$dataKey] = $dataValue;
+            }
+        }
+        return $contacts;
+    }
+
+    /**
+     * Удаляет поля из форматированных контактов
+     */
+    public function removeFieldsFromContacts(array $contacts, array $fields): array
+    {
+        foreach ($contacts as $key => $contact) {
+            foreach ($fields as $field) {
+                unset($contacts[$key][$field]);
+            }
+        }
+        return $contacts;
+    }
+
+    /**
+     * Возвращает массив с контактами, которые нужно удалить
+     */
+    public function prepareContactsForDelete(array $contacts, array $emails): array
+    {
+        $contactsToDel = [];
+        foreach ($emails as $id => $emails) {
+            foreach ($emails as $email) {
+                foreach ($contacts as $contact) {
+                    if ((int) $contact['id'] === $id) {
+                        $contactsToDel[] = [
+                            'id' => $contact['id'],
+                            'email' => $email,
+                            'delete' => 1,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return $contactsToDel;
     }
 }

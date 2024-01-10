@@ -48,4 +48,5 @@ return static function (Application $app, MiddlewareFactory $factory, ContainerI
     $app->get($apiPrefix . '/send-contacts-to-unisender', App\Handler\SendContactsToUnisenderHandler::class, 'api.send-contacts-to-unisender');
     $app->get($apiPrefix . '/create-user', App\Handler\CreateUserHandler::class, 'api.create-user');
     $app->post($apiPrefix . '/uni-api-key', App\Handler\GetUniApiKeyHandler::class, 'api.uni-api-key');
+    $app->post($apiPrefix . '/amo-uni-sync', App\Handler\AmoUniSyncHandler::class, 'api.amo-uni-sync');
 };
