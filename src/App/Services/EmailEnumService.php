@@ -9,7 +9,7 @@ use Exception;
 /**
  * Сервис для работы с email custom field
  */
-class EmailService
+class EmailEnumService
 {
     /**
      * Возвращает email custom field
@@ -34,7 +34,6 @@ class EmailService
      */
     public function findEmailEnumIds(array $customField, array $enumEmailCodes): array
     {
-        dd($enumEmailCodes);
         $enums = $customField['enums'];
         $enumIds = [];
         foreach ($enums as $enum) {

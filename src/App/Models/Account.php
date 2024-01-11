@@ -17,6 +17,6 @@ class Account extends Model
         'account_id',
         'unisender_api_key',
         'amo_access_jwt',
-        'enum_codes'
+        'enum_codes',
     ];
 }

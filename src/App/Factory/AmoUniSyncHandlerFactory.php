@@ -7,7 +7,7 @@ namespace App\Factory;
 use App\Interfaces\Service\AccountServiceInterface;
 use App\Services\ContactService;
 use App\Services\ContactFormatterService;
-use App\Services\EmailService;
+use App\Services\EmailEnumService;
 use Psr\Container\ContainerInterface;
 use App\Handler\AmoUniSyncHandler;
 
@@ -21,7 +21,7 @@ class AmoUniSyncHandlerFactory
             $container->get(AccountServiceInterface::class),
             $container->get(AmoCRMApiClientFactory::class),
             new ContactService(),
-            new EmailService(),
+            new EmailEnumService(),
         );
     }
 }
