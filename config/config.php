@@ -30,13 +30,10 @@ define('FIELDS', [
 
 /**
  * Поля которые будут содержать множество значений
- * Ключ - имя поля (field_name). 'enum_code' - признак по которому будут добавляться поля. 'name' - поле, которое добавится в элемент $contacts
+ * Ключ - имя поля. Значение - ключ, который добавится в элемент $contacts.
  */
 define('FIELDS_MULTI_VAL', [
-    'Email' => [
-        "enum" => "113196",
-        'name' => 'email'
-    ]
+    'Email' => 'email',
 ]);
 
 /**
@@ -78,6 +75,7 @@ $aggregator = new ConfigAggregator([
     //   - `*.global.php`
     //   - `local.php`
     //   - `*.local.php`
+    Module\ConfigProvider::class,
     new PhpFileProvider(realpath(__DIR__) . '/autoload/{{,*.}global,{,*.}local}.php'),
     // Load development config if it exists
     new PhpFileProvider(realpath(__DIR__) . '/development.config.php'),

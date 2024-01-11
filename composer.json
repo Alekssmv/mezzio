@@ -65,11 +65,13 @@
         "mezzio/mezzio-tooling": "^2.1",
         "phpunit/phpunit": "^9.5.11",
         "roave/security-advisories": "dev-master",
+        "squizlabs/php_codesniffer": "^3.8",
         "symfony/var-dumper": "^5.4"
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/App/"
+            "App\\": "src/App/",
+            "Module\\": "src/Module/"
         }
     },
     "autoload-dev": {

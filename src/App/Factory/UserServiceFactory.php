@@ -15,8 +15,6 @@ class UserServiceFactory
 {
     public function __invoke(ContainerInterface $container): UserService
     {
-        return new UserService(
-            new UserRepository()
-        );
+        return new UserService(new UserRepository());
     }
 }

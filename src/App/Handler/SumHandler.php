@@ -16,7 +16,7 @@ class SumHandler implements RequestHandlerInterface
         $a = (int) $request->getAttribute('a');
         $b = (int) $request->getAttribute('b');
         $sum = $a + $b;
-        
+
         return new JsonResponse(['sum' => $sum]);
     }
 }

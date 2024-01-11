@@ -54,7 +54,7 @@ class GetUniApiKeyHandler implements RequestHandlerInterface
                 'error' => $e->getMessage(),
             ]);
         }
-        
+
         return new JsonResponse([
             'status' => 'success',
             'data' => [

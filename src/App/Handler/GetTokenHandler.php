@@ -46,6 +46,10 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
+
+        /**
+         * @var AccountService $accountService
+         */
         $accountService = $this->accountService;
         $accessToken = null;
 
@@ -60,7 +64,7 @@ class GetTokenHandler implements RequestHandlerInterface
                     'access_token' => $accessToken['accessToken'],
                     'refresh_token' => $accessToken['refreshToken'],
                     'expires' => $accessToken['expires'],
-                    'base_domain' => $accessToken['baseDomain']
+                    'base_domain' => $accessToken['baseDomain'],
                 ]);
             }
         } catch (Exception $e) {
@@ -68,22 +72,26 @@ class GetTokenHandler implements RequestHandlerInterface
         }
 
         /**
-         * Если токен есть и он не истек, то редиректим на /redirect-uri с параметром account_id
+         * Если токен есть и он не истек, то возвращаем ответ success
          */
         if ($accessToken !== null && !$accessToken->hasExpired()) {
+            $apiClient->setAccessToken($accessToken);
+            $apiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
 
             /**
              * Устанавливаем вебхук
              */
-            $apiClient->setAccessToken($accessToken);
-            $apiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
-
             if ($apiClient->webhooks()->get() === null) {
                 $webhookModel = new WebhookModel();
                 $webhookModel->setDestination($_ENV['NGROK_HOSTNAME'] . '/api/v1/amo-uni-sync');
                 $webhookModel->setSettings(['add_contact', 'update_contact', 'delete_contact']);
                 $apiClient->webhooks()->subscribe($webhookModel);
             }
+
+            /**
+             * Устанавливаем enum_code для аккаунта
+             */
+            $accountService->addEnumCodes((int) $params['account_id'], ['WORK']);
 
             return new JsonResponse(['success' => true]);
         }
@@ -118,7 +126,12 @@ class GetTokenHandler implements RequestHandlerInterface
                 header('Location: ' . $authorizationUrl);
                 die;
             }
-        } elseif (!isset($params['from_widget']) && (empty($params['state']) || empty($_SESSION['oauth2state']) || ($params['state'] !== $_SESSION['oauth2state']))) {
+        } elseif (
+            !isset($params['from_widget'])
+            && (empty($params['state'])
+            || empty($_SESSION['oauth2state'])
+            || ($params['state'] !== $_SESSION['oauth2state']))
+        ) {
             unset($_SESSION['oauth2state']);
             exit('Invalid state');
         }
@@ -140,6 +153,11 @@ class GetTokenHandler implements RequestHandlerInterface
                 $apiClient->webhooks()->subscribe($webhookModel);
             }
 
+            /**
+             * Устанавливаем enum_code для аккаунта
+             */
+            $accountService->addEnumCodes((int) $params['account_id'], ['WORK', 'PRIV']);
+
             $accountId = $apiClient->account()->getCurrent()->toArray()['id'];
             if (!$accessToken->hasExpired()) {
                 $accountService->findOrCreate((int) $accountId);
@@ -150,7 +168,7 @@ class GetTokenHandler implements RequestHandlerInterface
                             'accessToken' => $accessToken->getToken(),
                             'refreshToken' => $accessToken->getRefreshToken(),
                             'expires' => $accessToken->getExpires(),
-                            'baseDomain' => $params['referer']
+                            'baseDomain' => $params['referer'],
                         ]
                     )
                 );

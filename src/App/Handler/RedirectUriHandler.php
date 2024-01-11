@@ -44,7 +44,7 @@ class RedirectUriHandler implements RequestHandlerInterface
                 'error' => $e->getMessage(),
             ]);
         }
-        
+
         return new HtmlResponse(
             $this->renderer->render(
                 'app::redirect-uri',

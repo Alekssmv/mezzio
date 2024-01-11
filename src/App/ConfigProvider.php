@@ -52,7 +52,7 @@ class ConfigProvider
                 Handler\SendContactsToUnisenderHandler::class => Factory\SendContactsToUnisenderHandlerFactory::class,
                 Handler\GetUniApiKeyHandler::class => Factory\GetUniApiKeyHandlerFactory::class,
                 Handler\CreateUserHandler::class => Factory\CreateUserHandlerFactory::class,
-                
+
                 Handler\AmoUniSyncHandler::class => Factory\AmoUniSyncHandlerFactory::class,
             ],
         ];
