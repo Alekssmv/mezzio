@@ -88,11 +88,20 @@ class SendContactsToUnisenderHandler implements RequestHandlerInterface
         $this->apiClient->setAccessToken($token)->setAccountBaseDomain($baseDomain);
 
         $contacts = $this->apiClient->contacts()->get()->toArray();
-        $contacts = $this->contactsService->formatContacts($contacts, self::CUSTOM_FIELD_NAMES, self::FIELDS, self::FIELDS_MULTI_VAL);
+        $contacts = $this->contactsService->formatContacts(
+            $contacts,
+            self::CUSTOM_FIELD_NAMES,
+            self::FIELDS,
+            self::FIELDS_MULTI_VAL
+        );
         $contacts = $this->contactsService->filterContacts($contacts, self::REQ_FIELDS);
         $contacts = $this->contactsService->dublicateContacts($contacts, self::REQ_FIELDS);
 
-        $fieldNames = $this->contactsService->getFieldNames(self::CUSTOM_FIELD_NAMES, self::FIELDS, self::FIELDS_MULTI_VAL);
+        $fieldNames = $this->contactsService->getFieldNames(
+            self::CUSTOM_FIELD_NAMES,
+            self::FIELDS,
+            self::FIELDS_MULTI_VAL
+        );
         $data = $this->contactsService->getDataForUnisender($contacts, $fieldNames);
 
         $params = [

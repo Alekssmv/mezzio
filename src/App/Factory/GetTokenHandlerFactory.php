@@ -14,7 +14,7 @@ class GetTokenHandlerFactory
     {
         return new GetTokenHandler(
             $container->get(AmoCRMApiClientFactory::class),
-            $container->get(AccountServiceInterface::class)
+            $container->get(AccountServiceInterface::class),
         );
     }
 }

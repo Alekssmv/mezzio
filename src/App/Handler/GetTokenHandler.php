@@ -64,7 +64,7 @@ class GetTokenHandler implements RequestHandlerInterface
                     'access_token' => $accessToken['accessToken'],
                     'refresh_token' => $accessToken['refreshToken'],
                     'expires' => $accessToken['expires'],
-                    'base_domain' => $accessToken['baseDomain']
+                    'base_domain' => $accessToken['baseDomain'],
                 ]);
             }
         } catch (Exception $e) {
@@ -168,7 +168,7 @@ class GetTokenHandler implements RequestHandlerInterface
                             'accessToken' => $accessToken->getToken(),
                             'refreshToken' => $accessToken->getRefreshToken(),
                             'expires' => $accessToken->getExpires(),
-                            'baseDomain' => $params['referer']
+                            'baseDomain' => $params['referer'],
                         ]
                     )
                 );
