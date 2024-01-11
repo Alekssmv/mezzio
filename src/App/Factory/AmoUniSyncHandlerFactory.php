@@ -8,7 +8,6 @@ use App\Interfaces\Service\AccountServiceInterface;
 use App\Services\ContactService;
 use App\Services\ContactFormatterService;
 use App\Services\EmailService;
-use Mezzio\Template\TemplateRendererInterface;
 use Psr\Container\ContainerInterface;
 use App\Handler\AmoUniSyncHandler;
 

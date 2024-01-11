@@ -6,3 +6,4 @@
 /vendor/
 /.env
 /.ngrok.env
+/.vscode

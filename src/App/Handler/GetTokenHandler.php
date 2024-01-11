@@ -91,7 +91,7 @@ class GetTokenHandler implements RequestHandlerInterface
             /**
              * Устанавливаем enum_code для аккаунта
              */
-            $accountService->addEnumCodes((int)$params['account_id'], ['WORK']);
+            $accountService->addEnumCodes((int) $params['account_id'], ['WORK']);
 
             return new JsonResponse(['success' => true]);
         }
@@ -126,7 +126,12 @@ class GetTokenHandler implements RequestHandlerInterface
                 header('Location: ' . $authorizationUrl);
                 die;
             }
-        } elseif (!isset($params['from_widget']) && (empty($params['state']) || empty($_SESSION['oauth2state']) || ($params['state'] !== $_SESSION['oauth2state']))) {
+        } elseif (
+            !isset($params['from_widget'])
+            && (empty($params['state'])
+            || empty($_SESSION['oauth2state'])
+            || ($params['state'] !== $_SESSION['oauth2state']))
+        ) {
             unset($_SESSION['oauth2state']);
             exit('Invalid state');
         }
@@ -151,7 +156,7 @@ class GetTokenHandler implements RequestHandlerInterface
             /**
              * Устанавливаем enum_code для аккаунта
              */
-            $accountService->addEnumCodes((int)$params['account_id'], ['WORK', 'PRIV']);
+            $accountService->addEnumCodes((int) $params['account_id'], ['WORK', 'PRIV']);
 
             $accountId = $apiClient->account()->getCurrent()->toArray()['id'];
             if (!$accessToken->hasExpired()) {

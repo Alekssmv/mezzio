@@ -12,6 +12,9 @@ class GetTokenHandlerFactory
 {
     public function __invoke(ContainerInterface $container): GetTokenHandler
     {
-        return new GetTokenHandler($container->get(AmoCRMApiClientFactory::class), $container->get(AccountServiceInterface::class));
+        return new GetTokenHandler(
+            $container->get(AmoCRMApiClientFactory::class),
+            $container->get(AccountServiceInterface::class)
+        );
     }
 }

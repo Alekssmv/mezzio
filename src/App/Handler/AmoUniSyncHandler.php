@@ -166,7 +166,13 @@ class AmoUniSyncHandler implements RequestHandlerInterface
              * Обработка для добавления контактов
              */
             if ($action === 'add') {
-                $contacts = $contactFormatterService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL, $enumIds);
+                $contacts = $contactFormatterService->formatContacts(
+                    $contacts,
+                    CUSTOM_FIELD_NAMES,
+                    FIELDS,
+                    FIELDS_MULTI_VAL,
+                    $enumIds
+                );
                 $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
                 $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
                 $contactsBuff = array_merge($contactsBuff, $contacts);
@@ -175,7 +181,13 @@ class AmoUniSyncHandler implements RequestHandlerInterface
                  * Обработка для обновления контактов
                  */
             } elseif ($action === 'update') {
-                $contacts = $contactFormatterService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL, $enumIds);
+                $contacts = $contactFormatterService->formatContacts(
+                    $contacts,
+                    CUSTOM_FIELD_NAMES,
+                    FIELDS,
+                    FIELDS_MULTI_VAL,
+                    $enumIds
+                );
                 $newEmails = array_column($contacts, 'email', 'id');
                 $oldEmails = $contactService->getEmails(array_column($contacts, 'id'));
                 $emailsToRemove = ArrayHelper::arrayDiffRecursive($oldEmails, $newEmails);
@@ -196,7 +208,11 @@ class AmoUniSyncHandler implements RequestHandlerInterface
         /**
          * Получаем все поля для Unisender, кроме id
          */
-        $fieldNames = $contactFormatterService->getFieldNames(CUSTOM_FIELD_NAMES, ['name' => 'Name', 'delete' => 'delete'], FIELDS_MULTI_VAL);
+        $fieldNames = $contactFormatterService->getFieldNames(
+            CUSTOM_FIELD_NAMES,
+            ['name' => 'Name', 'delete' => 'delete'],
+            FIELDS_MULTI_VAL
+        );
         $data = $contactFormatterService->getDataForUnisender($contactsBuff, $fieldNames);
 
         $params = [
