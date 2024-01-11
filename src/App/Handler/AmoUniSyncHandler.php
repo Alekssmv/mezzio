@@ -16,15 +16,10 @@ use Exception;
 use League\OAuth2\Client\Token\AccessToken;
 use App\Services\ContactService;
 use App\Helper\ArrayHelper;
+use App\Services\EmailService;
 
 class AmoUniSyncHandler implements RequestHandlerInterface
 {
-    private const ACTIONS = [
-        'add' => 'add',
-        'update' => 'update',
-        'delete' => 'delete',
-    ];
-
     /**
      * @var UnisenderApi
      */
@@ -50,18 +45,25 @@ class AmoUniSyncHandler implements RequestHandlerInterface
      */
     private $contactService;
 
+    /**
+     * @var EmailService
+     */
+    private $emailService;
+
     public function __construct(
         UnisenderApi $unisenderApi,
         ContactFormatterService $contactFormatterService,
         AccountService $accountService,
         AmoCRMApiClient $amoApiClient,
-        ContactService $contactService
+        ContactService $contactService,
+        EmailService $emailService
     ) {
         $this->unisenderApi = $unisenderApi;
         $this->contactFormatterService = $contactFormatterService;
         $this->accountService = $accountService;
         $this->amoApiClient = $amoApiClient;
         $this->contactService = $contactService;
+        $this->emailService = $emailService;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -90,6 +92,11 @@ class AmoUniSyncHandler implements RequestHandlerInterface
          * @var ContactService $contactService
          */
         $contactService = $this->contactService;
+
+        /**
+         * @var EmailService $emailService
+         */
+        $emailService = $this->emailService;
 
         $uniApiKey = null;
         $account = null;
@@ -141,20 +148,14 @@ class AmoUniSyncHandler implements RequestHandlerInterface
             return new JsonResponse(['error' => $e->getMessage()], 400);
         }
 
-        $emailEnumCodes = json_decode($account->enum_codes, true)['enums']['email'];
-        dd($emailEnumCodes);
-        $emailEnumIds = [];
-        $customFields = $amoApiClient->customFields('contacts')->get();
-        $emailCustomFields = null;
-        foreach ($customFields as $customField) {
-            if ($customField->getName() === 'Email') {
-                $emailCustomFields = $customField;
-            }
-        }
-        foreach ($emailCustomFields as $emailCustomField) {
-        }
-
-
+        /**
+         * Получаем id enum полей для email
+         */
+        $emailEnumCodes = json_decode($accountService->findByAccountId((int) $params['account']['id'])->enum_codes);
+        $emailEnumCodes = array_flip($emailEnumCodes);
+        $customFields = $amoApiClient->customFields('contacts')->get()->toArray();
+        $emailField = $emailService->findEmailField($customFields);
+        $enumIds = $emailService->findEmailEnumIds($emailField, $emailEnumCodes);
 
         /**
          * Обрабатываем контакты
@@ -165,14 +166,7 @@ class AmoUniSyncHandler implements RequestHandlerInterface
              * Обработка для добавления контактов
              */
             if ($action === 'add') {
-                $contacts = $contactFormatterService->formatContacts($contacts, [
-                    'Телефон' => 'phone',
-                    'Должность' => 'job_title',
-                ], [
-                    'name' => 'Name',
-                    'delete' => 'delete',
-                    'id' => 'id',
-                ], FIELDS_MULTI_VAL);
+                $contacts = $contactFormatterService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL, $enumIds);
                 $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
                 $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
                 $contactsBuff = array_merge($contactsBuff, $contacts);
@@ -181,7 +175,7 @@ class AmoUniSyncHandler implements RequestHandlerInterface
                  * Обработка для обновления контактов
                  */
             } elseif ($action === 'update') {
-                $contacts = $contactFormatterService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL);
+                $contacts = $contactFormatterService->formatContacts($contacts, CUSTOM_FIELD_NAMES, FIELDS, FIELDS_MULTI_VAL, $enumIds);
                 $newEmails = array_column($contacts, 'email', 'id');
                 $oldEmails = $contactService->getEmails(array_column($contacts, 'id'));
                 $emailsToRemove = ArrayHelper::arrayDiffRecursive($oldEmails, $newEmails);
@@ -199,7 +193,6 @@ class AmoUniSyncHandler implements RequestHandlerInterface
                 $contactsBuff = array_merge($contactsBuff, $contactsToDel);
             }
         }
-
         /**
          * Получаем все поля для Unisender, кроме id
          */
@@ -212,7 +205,6 @@ class AmoUniSyncHandler implements RequestHandlerInterface
             'field_names' => $fieldNames,
             'data' => $data,
         ];
-
         $response = $unisenderApi->importContacts($params);
         $response = (json_decode($response)->result);
 

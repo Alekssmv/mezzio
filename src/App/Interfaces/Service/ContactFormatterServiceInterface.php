@@ -9,7 +9,7 @@ namespace App\Interfaces\Service;
  */
 interface ContactFormatterServiceInterface
 {
-    public function formatContacts(array $contacts, array $customFieldCodes, array $fields, array $fieldsMultiVal): array;
+    public function formatContacts(array $contacts, array $customFieldCodes, array $fields, array $fieldsMultiVal, array $enumIds): array;
 
     public function filterContacts(array $contacts, array $reqFields): array;
 

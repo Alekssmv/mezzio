@@ -13,5 +13,5 @@ class Account extends Model
 {
     protected $primaryKey = 'account_id';
     protected $table = 'accounts';
-    protected $fillable = ['account_id', 'unisender_api_key', 'amo_access_jwt'];
+    protected $fillable = ['account_id', 'unisender_api_key', 'amo_access_jwt', 'enum_codes'];
 }

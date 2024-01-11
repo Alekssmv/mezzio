@@ -70,4 +70,15 @@ class AccountService implements AccountServiceInterface
     {
         return $this->accountRepository->findByAccountId($accountId);
     }
+
+    /**
+     * Добавляет enum_codes email'ов в запись аккаунта
+     * @param int $accountId
+     * @param array $enumCodes
+     * @return Account
+     */
+    public function addEnumCodes(int $accountId, array $enumCodes): Account
+    {
+        return $this->accountRepository->addEnumCodes($accountId, $enumCodes);
+    }
 }

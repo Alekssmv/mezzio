@@ -11,7 +11,6 @@ use App\Interfaces\Service\ContactFormatterServiceInterface;
  */
 class ContactFormatterService implements ContactFormatterServiceInterface
 {
-
     /**
      * Форматируем контакты
      * @param array $contacts - контакты из amoCRM
@@ -29,12 +28,18 @@ class ContactFormatterService implements ContactFormatterServiceInterface
      *      'name' => 'email'
      *      ]
      *  ];
+     * @param array $enumIds - массив с id enum полей, по которым нужно добавить поля с множественными значениями
      * @return array - отформатированные контакты
      */
-    public function formatContacts(array $contacts, array $customFieldNames, array $fields, array $fieldsMultiVal): array
-    {
+    public function formatContacts(
+        array $contacts,
+        array $customFieldNames,
+        array $fields,
+        array $fieldsMultiVal,
+        array $enumIds
+    ): array {
         foreach ($contacts as $key => $contact) {
-            
+
             /**
              * Создаем буферный контакт, чтобы не потерять данные
              */
@@ -50,7 +55,7 @@ class ContactFormatterService implements ContactFormatterServiceInterface
             if (!isset($bufferContact[$customFieldsKey][0][$customFieldName])) {
                 $customFieldName = 'name';
             }
-            
+
             if ($bufferContact[$customFieldsKey] !== null) {
                 /**
                  * Добавляем кастомные поля выбранные по $customFieldNames поля в контакт, если они есть и не пустые
@@ -63,8 +68,7 @@ class ContactFormatterService implements ContactFormatterServiceInterface
                         $contacts[$key][$customFieldNames[$customField[$customFieldName]]] = $customField['values'][0]['value'];
                     }
                 }
-                
-                
+
                 /*
                  * Добавляем поля с множественными значениями выбранные по $fieldsMultiVal поля в контакт
                  */
@@ -75,15 +79,14 @@ class ContactFormatterService implements ContactFormatterServiceInterface
                             isset($customField['values'])
                         ) {
                             foreach ($customField['values'] as $value) {
-                                if ($value['enum'] === $fieldValue['enum']) {
-                                    $contacts[$key][$fieldValue['name']][] = $value['value'];
+                                if (isset($enumIds[$fieldKey][$value['enum']])) {
+                                    $contacts[$key][$fieldValue][] = $value['value'];
                                 }
                             }
                         }
                     }
                 }
             }
-            
             /**
              * Добавляем обычные поля выбранные по $fields поля в контакт, если они есть и не пустые
              */
@@ -197,11 +200,7 @@ class ContactFormatterService implements ContactFormatterServiceInterface
      */
     public function getFieldNames(array $fields, array $customFieldNames, array $fieldsMultiVal): array
     {
-        $multiValNames = array_map(function ($field) {
-            return $field['name'];
-        }, $fieldsMultiVal);
-
-        return array_merge(array_values($customFieldNames), array_values($fields), array_values($multiValNames));
+        return array_merge(array_values($customFieldNames), array_values($fields), array_values($fieldsMultiVal));
     }
 
     /**

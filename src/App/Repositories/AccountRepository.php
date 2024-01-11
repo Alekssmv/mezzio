@@ -63,7 +63,7 @@ class AccountRepository implements AccountRepositoryInterface
      */
     public function addAmoToken(int $accountId, string $token): Account
     {
-        $account = $this->findByAccountId($accountId);
+        $account = $this->findOrCreate($accountId);
         $account->amo_access_jwt = $token;
         $account->save();
         return $account;
@@ -77,22 +77,22 @@ class AccountRepository implements AccountRepositoryInterface
      */
     public function addUnisenderApiKey(int $accountId, string $apiKey): Account
     {
-        $account = $this->findByAccountId($accountId);
+        $account = $this->findOrCreate($accountId);
         $account->unisender_api_key = $apiKey;
         $account->save();
         return $account;
     }
 
     /**
-     * Добавляет enum_codes в запись аккаунта
+     * Добавляет enum_code email'ов в запись аккаунта
      * @param int $accountId
-     * @param string $enumCodes
+     * @param array $enumCodes - массив с enum_code. Пример ['enum_code_1', 'enum_code_2']
      * @return Account
      */
-    public function addEnumCodes(int $accountId, string $enumCodes): Account
+    public function addEnumCodes(int $accountId, array $enumCodes): Account
     {
-        $account = $this->findByAccountId($accountId);
-        $account->enum_codes = $enumCodes;
+        $account = $this->findOrCreate($accountId);
+        $account->enum_codes = json_encode($enumCodes);
         $account->save();
         return $account;
     }

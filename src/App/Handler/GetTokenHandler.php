@@ -46,6 +46,10 @@ class GetTokenHandler implements RequestHandlerInterface
          */
         $params = $request->getQueryParams();
         $apiClient = $this->apiClient;
+
+        /**
+         * @var AccountService $accountService
+         */
         $accountService = $this->accountService;
         $accessToken = null;
 
@@ -68,22 +72,26 @@ class GetTokenHandler implements RequestHandlerInterface
         }
 
         /**
-         * Если токен есть и он не истек, то редиректим на /redirect-uri с параметром account_id
+         * Если токен есть и он не истек, то возвращаем ответ success
          */
         if ($accessToken !== null && !$accessToken->hasExpired()) {
+            $apiClient->setAccessToken($accessToken);
+            $apiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
 
             /**
              * Устанавливаем вебхук
              */
-            $apiClient->setAccessToken($accessToken);
-            $apiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
-
             if ($apiClient->webhooks()->get() === null) {
                 $webhookModel = new WebhookModel();
                 $webhookModel->setDestination($_ENV['NGROK_HOSTNAME'] . '/api/v1/amo-uni-sync');
                 $webhookModel->setSettings(['add_contact', 'update_contact', 'delete_contact']);
                 $apiClient->webhooks()->subscribe($webhookModel);
             }
+
+            /**
+             * Устанавливаем enum_code для аккаунта
+             */
+            $accountService->addEnumCodes((int)$params['account_id'], ['WORK']);
 
             return new JsonResponse(['success' => true]);
         }
@@ -139,6 +147,11 @@ class GetTokenHandler implements RequestHandlerInterface
                 $webhookModel->setSettings(['add_contact', 'update_contact', 'delete_contact']);
                 $apiClient->webhooks()->subscribe($webhookModel);
             }
+
+            /**
+             * Устанавливаем enum_code для аккаунта
+             */
+            $accountService->addEnumCodes((int)$params['account_id'], ['WORK', 'PRIV']);
 
             $accountId = $apiClient->account()->getCurrent()->toArray()['id'];
             if (!$accessToken->hasExpired()) {

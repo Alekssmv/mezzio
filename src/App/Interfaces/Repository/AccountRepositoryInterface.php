@@ -53,5 +53,5 @@ interface AccountRepositoryInterface
      * @param string $enumCodes
      * @return Account
      */
-    public function addEnumCodes(int $accountId, string $enumCodes): Account;
+    public function addEnumCodes(int $accountId, array $enumCodes): Account;
 }
