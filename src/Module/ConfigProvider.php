@@ -20,7 +20,9 @@ class ConfigProvider
                 Command\HowTime::class => Command\HowTime::class,
             ],
             'factories' => [
-                Worker\Time::class => Worker\TimeFactory::class,
+                Worker\Time::class => Worker\Factory\TimeFactory::class,
+                Worker\UniSenderApiKey::class => Worker\Factory\UniSenderApiKeyFactory::class,
+                Worker\Token::class => Worker\Factory\TokenFactory::class,
             ]
         ];
     }
@@ -31,6 +33,8 @@ class ConfigProvider
             'commands' => [
                 'how-time' => Command\HowTime::class,
                 'time-worker' => Worker\Time::class,
+                'unisender-api-key-worker' => Worker\UniSenderApiKey::class,
+                'token-worker' => Worker\Token::class,
             ],
         ];
     }

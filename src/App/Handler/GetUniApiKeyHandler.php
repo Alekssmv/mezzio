@@ -11,6 +11,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Exception;
+use Module\Config\Beanstalk as BeanstalkConfig;
+use Pheanstalk\Pheanstalk;
 
 /**
  * Принимает параметры unisender_key и account_id
@@ -29,38 +31,29 @@ class GetUniApiKeyHandler implements RequestHandlerInterface
      */
     private AccountService $accountService;
 
+    /**
+     * @var Pheanstalk - подключение к beanstalk
+     */
+    private Pheanstalk $beanstalk;
+
     public function __construct(
         AmoCRMApiClient $apiClient,
-        AccountService $accountService
+        AccountService $accountService,
+        BeanstalkConfig $beanstalkConfig
     ) {
         $this->apiClient = $apiClient;
         $this->accountService = $accountService;
+        $this->beanstalk = $beanstalkConfig->getConnection();
     }
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $params = $request->getParsedBody();
 
-        if (!isset($params['unisender_key']) && !isset($params['account_id'])) {
-            return new JsonResponse([
-                'error' => 'unisender_key and account_id are required',
-            ], 400);
-        }
-
-        try {
-            $account = $this->accountService->findOrCreate((int) $params['account_id']);
-            $account = $this->accountService->addUnisenderApiKey((int) $params['account_id'], $params['unisender_key']);
-        } catch (Exception $e) {
-            return new JsonResponse([
-                'error' => $e->getMessage(),
-            ]);
-        }
+        $this->beanstalk->useTube('unisender-api-key')->put(json_encode($params));
 
         return new JsonResponse([
-            'status' => 'success',
-            'data' => [
-                'unisender_key' => $account->unisender_api_key,
-                'account_id' => $account->account_id,
-            ],
+            'success' => true,
+            'message' => 'Задача на добавление unisender api key в очередь успешно добавлена'
         ]);
     }
 }

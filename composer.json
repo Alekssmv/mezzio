@@ -73,7 +73,8 @@
         "psr-4": {
             "App\\": "src/App/",
             "Module\\": "src/Module/"
-        }
+        },
+        "files": ["config/bootstrap.php"]        
     },
     "autoload-dev": {
         "psr-4": {

@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Module\Worker;
+namespace Module\Worker\Factory;
 
+use Module\Config\Beanstalk;
 use Module\Worker\Time;
 use Psr\Container\ContainerInterface;
 
@@ -14,6 +15,6 @@ class TimeFactory
 {
     public function __invoke(ContainerInterface $container): Time
     {
-        return new Time();
+        return new Time(new Beanstalk($container), 'times');
     }
 }
