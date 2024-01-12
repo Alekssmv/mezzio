@@ -8,7 +8,7 @@ use Module\Worker\Time;
 use Psr\Container\ContainerInterface;
 
 /**
- * Фабрика для создания экземпляра сервиса для работы с аккаунтами
+ * Фабрика для создания экземпляра воркера по выводу времени
  */
 class TimeFactory
 {
