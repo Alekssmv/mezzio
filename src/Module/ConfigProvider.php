@@ -18,6 +18,9 @@ class ConfigProvider
         return [
             'invokables' => [
                 Command\HowTime::class => Command\HowTime::class,
+            ],
+            'factories' => [
+                Worker\Time::class => Worker\TimeFactory::class,
             ]
         ];
     }
@@ -27,6 +30,7 @@ class ConfigProvider
         return [
             'commands' => [
                 'how-time' => Command\HowTime::class,
+                'time-worker' => Worker\Time::class,
             ],
         ];
     }
