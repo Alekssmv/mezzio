@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace App\Handler;
 
-use AmoCRM\Client\AmoCRMApiClient;
-use App\Services\AccountService;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Exception;
 use Module\Config\Beanstalk as BeanstalkConfig;
 use Pheanstalk\Pheanstalk;
 
@@ -22,27 +19,13 @@ use Pheanstalk\Pheanstalk;
 class GetUniApiKeyHandler implements RequestHandlerInterface
 {
     /**
-     * @var AmoCRMApiClient - клиент для работы с API amoCRM
-     */
-    private AmoCRMApiClient $apiClient;
-
-    /**
-     * @var AccountService - сервис для работы с аккаунтами
-     */
-    private AccountService $accountService;
-
-    /**
      * @var Pheanstalk - подключение к beanstalk
      */
     private Pheanstalk $beanstalk;
 
     public function __construct(
-        AmoCRMApiClient $apiClient,
-        AccountService $accountService,
         BeanstalkConfig $beanstalkConfig
     ) {
-        $this->apiClient = $apiClient;
-        $this->accountService = $accountService;
         $this->beanstalk = $beanstalkConfig->getConnection();
     }
     public function handle(ServerRequestInterface $request): ResponseInterface

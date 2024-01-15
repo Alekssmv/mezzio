@@ -5,17 +5,12 @@ declare(strict_types=1);
 namespace App\Handler;
 
 use AmoCRM\Client\AmoCRMApiClient;
-use App\Services\AccountService;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Exception;
-use League\OAuth2\Client\Token\AccessToken;
-use AmoCRM\Models\WebhookModel;
 use Pheanstalk\Pheanstalk;
 use Module\Config\Beanstalk as BeanstalkConfig;
-use Illuminate\Database\Capsule\Manager as Capsule;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
@@ -25,22 +20,15 @@ class GetTokenHandler implements RequestHandlerInterface
     private AmoCRMApiClient $apiClient;
 
     /**
-     * @var AccountService - сервис для работы с аккаунтами
-     */
-    private AccountService $accountService;
-
-    /**
      * @var Pheanstalk - подключение к beanstalk
      */
     private $beanstalk;
 
     public function __construct(
         AmoCRMApiClient $apiClient,
-        AccountService $accountService,
         BeanstalkConfig $beanstalkConfig
     ) {
         $this->apiClient = $apiClient;
-        $this->accountService = $accountService;
         $this->beanstalk = $beanstalkConfig->getConnection();
     }
     /**
