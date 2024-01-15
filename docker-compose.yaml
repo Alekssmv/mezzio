@@ -60,7 +60,14 @@ services:
         env_file:
             - .ngrok.env
         ports:
-            - "4040:4040"           
+            - "4040:4040"
+
+    # Queue Service
+    application-beanstalkd:
+        image: schickling/beanstalkd:latest
+        container_name: application-beanstalkd
+        ports:
+            - "11300:11300"      
          
 #Docker Volumes
 volumes:
