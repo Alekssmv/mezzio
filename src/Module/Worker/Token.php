@@ -47,21 +47,13 @@ class Token extends BaseWorker
     public function process($data): void
     {
         $params = $data;
-        $accessToken = null;
         $accountService = $this->accountService;
         $apiClient = $this->apiClient;
         $messagesPrefix = $this->messagesPrefix;
 
-        /**
-         * Полчаем токен по url параметру account_id
-         */
-        try {
-            if (isset($params['account_id']) && $params['account_id'] !== null) {
-                $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
-                if ($accessToken === null) {
-                    echo $messagesPrefix . 'Access token is not found in account with id ' . $params['account_id'] . PHP_EOL;
-                    return;
-                }
+        $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
+        if ($accessToken !== null) {
+            try {
                 $accessToken = json_decode((string) $accessToken, true);
                 $accessToken = new AccessToken([
                     'access_token' => $accessToken['accessToken'],
@@ -69,11 +61,11 @@ class Token extends BaseWorker
                     'expires' => $accessToken['expires'],
                     'base_domain' => $accessToken['baseDomain'],
                 ]);
+            } catch (Exception $e) {
+                echo $messagesPrefix . 'Can\'t get access token by account_id' . PHP_EOL;
+                echo $messagesPrefix . $e->getMessage() . PHP_EOL;
+                return;
             }
-        } catch (Exception $e) {
-            echo $messagesPrefix . 'Can\'t get access token by account_id' . PHP_EOL;
-            echo $messagesPrefix . $e->getMessage() . PHP_EOL;
-            return;
         }
 
         /**
@@ -83,6 +75,10 @@ class Token extends BaseWorker
             echo $messagesPrefix . 'Access token is valid for account with id ' . $params['account_id'] . PHP_EOL;
             return;
         }
+
+        /**
+         * Если токен есть и он истек, то обновляем его
+         */
         if ($accessToken !== null && $accessToken->hasExpired()) {
             try {
                 $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
