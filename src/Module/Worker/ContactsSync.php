@@ -157,7 +157,7 @@ class ContactsSync extends BaseWorker
                     FIELDS_MULTI_VAL,
                     $enumIds,
                 );
-                
+
                 $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
                 $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
                 $contactsBuff = array_merge($contactsBuff, $contacts);
@@ -201,14 +201,14 @@ class ContactsSync extends BaseWorker
             FIELDS_MULTI_VAL,
         );
         $data = $contactFormatterService->getDataForUnisender($contactsBuff, $fieldNames);
-        
+
         $params = [
             'format' => 'json',
             'api_key' => $uniApiKey,
             'field_names' => $fieldNames,
             'data' => $data,
         ];
-        
+
         $response = $unisenderApi->importContacts($params);
         $response = (json_decode($response)->result);
 
@@ -222,7 +222,7 @@ class ContactsSync extends BaseWorker
             }
         }
         $indexesToSkip = array_flip($indexesToSkip);
-        
+
         /**
          * Добавляем и удаляем контакты, в которых не произошло ошибки
          */
