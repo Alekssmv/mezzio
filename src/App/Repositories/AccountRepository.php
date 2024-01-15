@@ -96,4 +96,12 @@ class AccountRepository implements AccountRepositoryInterface
         $account->save();
         return $account;
     }
+
+    /**
+     * Возвращает все id аккаунтов
+     */
+    public function getAllIds(): array
+    {
+        return $this->account->all()->pluck('account_id')->toArray();
+    }
 }
