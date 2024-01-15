@@ -60,7 +60,8 @@ class GetTokenHandler implements RequestHandlerInterface
          * Ищем аккаунт по account_id, берем токен из него
          */
         if (isset($params['account_id']) && !empty($params['account_id'])) {
-            $account = $accountService->findByAccountId((int) $params['account_id']);
+            $account = $accountService
+                ->findByAccountId((int) $params['account_id']);
             $token = $account->amo_access_jwt;
 
             /**
@@ -87,7 +88,10 @@ class GetTokenHandler implements RequestHandlerInterface
          * Если запрос пришел с виджета, то добавляем задачу в очередь,
          * чтобы получить токен, если его нет
          */
-        if ($token === null && isset($params['code'], $params['from_widget'], $params['referer'])) {
+        if (
+            $token === null &&
+            isset($params['code'], $params['from_widget'], $params['referer'])
+        ) {
             $beanstalk->useTube('token')->put(json_encode($params));
             $tasks[] = 'token';
         }

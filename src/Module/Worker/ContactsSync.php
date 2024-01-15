@@ -35,12 +35,14 @@ class ContactsSync extends BaseWorker
     private AmoCRMApiClient $amoApiClient;
 
     /**
-     * @var EmailEnumService $emailEnumService - сервис для работы с enum полями email
+     * @var EmailEnumService $emailEnumService - сервис для работы
+     * с enum полями email
      */
     private EmailEnumService $emailEnumService;
 
     /**
-     * @var ContactFormatterService $contactFormatterService - сервис для форматирования контактов
+     * @var ContactFormatterService $contactFormatterService - сервис
+     * для форматирования контактов
      */
     private ContactFormatterService $contactFormatterService;
 
@@ -94,7 +96,8 @@ class ContactsSync extends BaseWorker
         }
 
         try {
-            $account = $this->accountService->findOrCreate((int) $params['account']['id']);
+            $account = $this->accountService
+                ->findOrCreate((int) $params['account']['id']);
             $uniApiKey = $account->unisender_api_key;
             $accessToken = $account->amo_access_jwt;
 
@@ -118,7 +121,8 @@ class ContactsSync extends BaseWorker
                 ]
             );
             $amoApiClient->setAccessToken($accessToken);
-            $amoApiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
+            $amoApiClient
+                ->setAccountBaseDomain($accessToken->getValues()['base_domain']);
 
             /**
              * Устанавливаем api key для Unisender
@@ -132,15 +136,22 @@ class ContactsSync extends BaseWorker
         /**
          * Получаем id enum полей для email
          */
-        $emailEnumCodes = json_decode($accountService->findByAccountId((int) $params['account']['id'])->enum_codes);
+        $emailEnumCodes =
+            json_decode($accountService->
+                findByAccountId((int) $params['account']['id'])
+                ->enum_codes);
         if (empty($emailEnumCodes)) {
             echo $messagesPrefix . 'enum codes is empty' . PHP_EOL;
             return;
         }
         $emailEnumCodes = array_flip($emailEnumCodes);
-        $customFields = $amoApiClient->customFields('contacts')->get()->toArray();
+        $customFields = $amoApiClient
+            ->customFields('contacts')
+            ->get()
+            ->toArray();
         $emailField = $emailEnumService->findEmailField($customFields);
-        $enumIds = $emailEnumService->findEmailEnumIds($emailField, $emailEnumCodes);
+        $enumIds = $emailEnumService
+            ->findEmailEnumIds($emailField, $emailEnumCodes);
 
         /**
          * Обрабатываем контакты
@@ -158,8 +169,10 @@ class ContactsSync extends BaseWorker
                     $enumIds,
                 );
 
-                $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
-                $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
+                $contacts = $contactFormatterService
+                    ->filterContacts($contacts, REQ_FIELDS);
+                $contacts = $contactFormatterService
+                    ->dublicateContacts($contacts, REQ_FIELDS);
                 $contactsBuff = array_merge($contactsBuff, $contacts);
                 /**
                  * Обработка для обновления контактов
@@ -173,11 +186,16 @@ class ContactsSync extends BaseWorker
                     $enumIds,
                 );
                 $newEmails = array_column($contacts, 'email', 'id');
-                $oldEmails = $contactService->getEmails(array_column($contacts, 'id'));
-                $emailsToRemove = ArrayHelper::arrayDiffRecursive($oldEmails, $newEmails);
-                $contactsToDel = $contactFormatterService->prepareContactsForDelete($contacts, $emailsToRemove);
-                $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
-                $contactsBuff = array_merge($contactsBuff, $contacts, $contactsToDel);
+                $oldEmails =
+                    $contactService->getEmails(array_column($contacts, 'id'));
+                $emailsToRemove =
+                    ArrayHelper::arrayDiffRecursive($oldEmails, $newEmails);
+                $contactsToDel = $contactFormatterService
+                    ->prepareContactsForDelete($contacts, $emailsToRemove);
+                $contacts = $contactFormatterService
+                    ->dublicateContacts($contacts, REQ_FIELDS);
+                $contactsBuff =
+                    array_merge($contactsBuff, $contacts, $contactsToDel);
 
                 /**
                  * Обработка для удаления контактов
@@ -185,7 +203,8 @@ class ContactsSync extends BaseWorker
             } elseif ($action === 'delete') {
                 $ids = array_column($contacts, 'id');
                 $emails = $contactService->getEmails($ids);
-                $contactsToDel = $contactFormatterService->prepareContactsForDelete($contacts, $emails);
+                $contactsToDel = $contactFormatterService
+                    ->prepareContactsForDelete($contacts, $emails);
                 $contactsBuff = array_merge($contactsBuff, $contactsToDel);
             }
         }
@@ -200,7 +219,8 @@ class ContactsSync extends BaseWorker
             ],
             FIELDS_MULTI_VAL,
         );
-        $data = $contactFormatterService->getDataForUnisender($contactsBuff, $fieldNames);
+        $data = $contactFormatterService
+            ->getDataForUnisender($contactsBuff, $fieldNames);
 
         $params = [
             'format' => 'json',
@@ -232,7 +252,10 @@ class ContactsSync extends BaseWorker
             } elseif (isset($contact['delete']) && $contact['delete'] == 1) {
                 $contactService->deleteEmail($contact['email'], (int) $contact['id']);
             } else {
-                $contactService->createOrUpdate(['id' => $contact['id'], 'email' => $contact['email']]);
+                $contactService->createOrUpdate([
+                    'id' => $contact['id'],
+                    'email' => $contact['email']
+                ]);
             }
         }
 

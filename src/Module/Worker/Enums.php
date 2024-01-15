@@ -59,7 +59,10 @@ class Enums extends BaseWorker
             return;
         }
 
-        echo $messagesPrefix . 'Enum codes were added to account with id ' . $params['account_id'] . PHP_EOL;
+        echo $messagesPrefix .
+            'Enum codes were added to account with id ' .
+            $params['account_id'] .
+            PHP_EOL;
     }
 
     /**

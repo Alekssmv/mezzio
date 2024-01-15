@@ -44,7 +44,9 @@ class UniSenderApiKey extends BaseWorker
          * Проверяем наличие account_id и unisender_key
          */
         if (!isset($params['unisender_key']) && !isset($params['account_id'])) {
-            echo $messagesPrefix . 'unisender_key and account_id are required' . PHP_EOL;
+            echo $messagesPrefix .
+                'unisender_key and account_id are required' .
+                PHP_EOL;
             return;
         }
 
@@ -58,13 +60,18 @@ class UniSenderApiKey extends BaseWorker
          */
         try {
             $account = $this->accountService->findOrCreate((int) $params['account_id']);
-            $account = $this->accountService->addUnisenderApiKey((int) $params['account_id'], $params['unisender_key']);
+            $account = $this
+                ->accountService
+                ->addUnisenderApiKey((int) $params['account_id'], $params['unisender_key']);
         } catch (Exception $e) {
             echo $messagesPrefix . $e->getMessage() . PHP_EOL;
             return;
         }
 
-        echo $messagesPrefix . 'Unisender api key was added to account with id ' . $account->account_id . PHP_EOL;
+        echo $messagesPrefix .
+            'Unisender api key was added to account with id ' .
+            $account->account_id .
+            PHP_EOL;
     }
 
     /**
@@ -72,6 +79,7 @@ class UniSenderApiKey extends BaseWorker
      */
     public function configure(): void
     {
-        $this->setDescription('Воркер для добавления unisender api key в базу данных');
+        $this
+            ->setDescription('Воркер для добавления unisender api key в базу данных');
     }
 }
