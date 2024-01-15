@@ -41,7 +41,7 @@ abstract class BaseWorker extends Command
             $job = $this->connection
             ->watchOnly($this->queue)
             ->ignore(PheanstalkInterface::DEFAULT_TUBE)
-            ->reserveWithTimeout(5)
+            ->reserveWithTimeout(2)
         ) {
             try {
                 $this->process(json_decode(

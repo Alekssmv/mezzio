@@ -50,21 +50,27 @@ class Token extends BaseWorker
         $accountService = $this->accountService;
         $apiClient = $this->apiClient;
         $messagesPrefix = $this->messagesPrefix;
+        $accessToken = null;
 
-        $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
-        if ($accessToken !== null) {
-            try {
-                $accessToken = json_decode((string) $accessToken, true);
-                $accessToken = new AccessToken([
+        /**
+         * Ищем аккаунт по параметру account_id, если он задан, берем токен из него
+         */
+        if (isset($params['account_id']) && !empty($params['account_id'])) {
+            $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
+            if ($accessToken !== null) {
+                try {
+                    $accessToken = json_decode((string) $accessToken, true);
+                    $accessToken = new AccessToken([
                     'access_token' => $accessToken['accessToken'],
                     'refresh_token' => $accessToken['refreshToken'],
                     'expires' => $accessToken['expires'],
                     'base_domain' => $accessToken['baseDomain'],
-                ]);
-            } catch (Exception $e) {
-                echo $messagesPrefix . 'Can\'t get access token by account_id' . PHP_EOL;
-                echo $messagesPrefix . $e->getMessage() . PHP_EOL;
-                return;
+                    ]);
+                } catch (Exception $e) {
+                    echo $messagesPrefix . 'Can\'t get access token by account_id' . PHP_EOL;
+                    echo $messagesPrefix . $e->getMessage() . PHP_EOL;
+                    return;
+                }
             }
         }
 
@@ -90,6 +96,9 @@ class Token extends BaseWorker
             return;
         }
 
+        /**
+         * Задаем домен для apiClient для взаимодействия с amoCRM
+         */
         if (isset($params['referer'])) {
             $apiClient->setAccountBaseDomain($params['referer']);
         }
@@ -100,8 +109,11 @@ class Token extends BaseWorker
         try {
             $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
             $apiClient->setAccessToken($accessToken);
-
             $accountId = $apiClient->account()->getCurrent()->toArray()['id'];
+
+            /**
+             * Если полученный токен не истек, то добавляем его в базу данных
+             */
             if (!$accessToken->hasExpired()) {
                 $accountService->findOrCreate((int) $accountId);
                 $accountService->addAmoToken(
