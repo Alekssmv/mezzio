@@ -48,6 +48,11 @@ class UniSenderApiKey extends BaseWorker
             return;
         }
 
+        if (empty($params['unisender_key'])) {
+            echo $messagesPrefix . 'unisender_key is empty' . PHP_EOL;
+            return;
+        }
+
         /**
          * Добавляем unisender api key
          */

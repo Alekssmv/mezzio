@@ -79,6 +79,7 @@ class ContactsSync extends BaseWorker
         $emailEnumService = $this->emailEnumService;
         $contactFormatterService = $this->contactFormatterService;
         $contactService = $this->contactService;
+        $contactsBuff = [];
 
         /**
          * Проверяем, что в запросе есть нужные параметры
@@ -132,6 +133,10 @@ class ContactsSync extends BaseWorker
          * Получаем id enum полей для email
          */
         $emailEnumCodes = json_decode($accountService->findByAccountId((int) $params['account']['id'])->enum_codes);
+        if (empty($emailEnumCodes)) {
+            echo $messagesPrefix . 'enum codes is empty' . PHP_EOL;
+            return;
+        }
         $emailEnumCodes = array_flip($emailEnumCodes);
         $customFields = $amoApiClient->customFields('contacts')->get()->toArray();
         $emailField = $emailEnumService->findEmailField($customFields);
@@ -141,7 +146,6 @@ class ContactsSync extends BaseWorker
          * Обрабатываем контакты
          */
         foreach ($params['contacts'] as $action => $contacts) {
-
             /**
              * Обработка для добавления контактов
              */
@@ -153,10 +157,10 @@ class ContactsSync extends BaseWorker
                     FIELDS_MULTI_VAL,
                     $enumIds,
                 );
+                
                 $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
                 $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
                 $contactsBuff = array_merge($contactsBuff, $contacts);
-
                 /**
                  * Обработка для обновления контактов
                  */
@@ -197,13 +201,14 @@ class ContactsSync extends BaseWorker
             FIELDS_MULTI_VAL,
         );
         $data = $contactFormatterService->getDataForUnisender($contactsBuff, $fieldNames);
-
+        
         $params = [
             'format' => 'json',
             'api_key' => $uniApiKey,
             'field_names' => $fieldNames,
             'data' => $data,
         ];
+        
         $response = $unisenderApi->importContacts($params);
         $response = (json_decode($response)->result);
 
@@ -217,7 +222,7 @@ class ContactsSync extends BaseWorker
             }
         }
         $indexesToSkip = array_flip($indexesToSkip);
-
+        
         /**
          * Добавляем и удаляем контакты, в которых не произошло ошибки
          */
@@ -231,7 +236,7 @@ class ContactsSync extends BaseWorker
             }
         }
 
-        echo $messagesPrefix . 'response: ' . $response . PHP_EOL;
+        echo $messagesPrefix . 'response: ' . json_encode($response) . PHP_EOL;
         return;
     }
 

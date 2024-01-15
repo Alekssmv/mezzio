@@ -77,7 +77,7 @@ class AmoUniSyncHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $params = $request->getQueryParams();
+        $params = $request->getParsedBody();
         $beanstalk = $this->beanstalk;
 
         $beanstalk->useTube('contacts-sync')->put(json_encode($params));
