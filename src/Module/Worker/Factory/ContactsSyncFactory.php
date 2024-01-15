@@ -11,12 +11,10 @@ use App\Services\ContactService;
 use App\Services\EmailEnumService;
 use Module\Config\Beanstalk;
 use Module\Worker\ContactsSync;
-use Module\Worker\Enums;
 use Psr\Container\ContainerInterface;
-use Unisender\ApiWrapper\UnisenderApi;
 
 /**
- * Фабрика для создания экземпляра воркера по установке unisender api key
+ * Фабрика для создания экземпляра воркера по синхронизации контактов
  */
 class ContactsSyncFactory
 {

@@ -11,7 +11,7 @@ use Module\Worker\Token;
 use Psr\Container\ContainerInterface;
 
 /**
- * Фабрика для создания экземпляра воркера по выводу времени
+ * Фабрика для создания экземпляра воркера по установке токена
  */
 class TokenFactory
 {

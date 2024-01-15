@@ -54,6 +54,9 @@ class Webhooks extends BaseWorker
         $messagesPrefix = $this->messagesPrefix;
         $account = null;
 
+        /**
+         * Проверяем наличие account_id
+         */
         if (!isset($params['account_id'])) {
             echo $messagesPrefix . 'account_id is required' . PHP_EOL;
             return;
@@ -62,6 +65,10 @@ class Webhooks extends BaseWorker
         try {
             $account = $accountService->findOrCreate((int) $params['account_id']);
             $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
+
+            /**
+             * Проверяем наличие токена
+             */
             if ($accessToken === null) {
                 echo $messagesPrefix . 'Access token is not found in account with id ' . $account->account_id . PHP_EOL;
                 return;
@@ -73,9 +80,16 @@ class Webhooks extends BaseWorker
                     'expires' => $accessToken['expires'],
                     'base_domain' => $accessToken['baseDomain'],
                 ]);
+
+            /**
+             * Устанавливаем accessToken для AmoCRM
+             */
             $apiClient->setAccessToken($accessToken);
             $apiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
 
+            /**
+             * Проверяем наличие webhooks
+             */
             if ($apiClient->webhooks()->get() === null) {
                 $webhookModel = new WebhookModel();
                 $webhookModel->setDestination($_ENV['NGROK_HOSTNAME'] . '/api/v1/amo-uni-sync');
@@ -83,6 +97,10 @@ class Webhooks extends BaseWorker
                 $apiClient->webhooks()->subscribe($webhookModel);
                 echo $messagesPrefix . 'Webhook was added to account with id ' . $account->account_id . PHP_EOL;
                 return;
+
+                /**
+                 * Если webhooks есть, то ничего не делаем
+                 */
             } elseif ($apiClient->webhooks()->get() !== null) {
                 echo $messagesPrefix . 'Webhook already exists in account with id ' . $account->account_id . PHP_EOL;
                 return;
@@ -94,6 +112,9 @@ class Webhooks extends BaseWorker
         }
     }
 
+    /**
+     * Добавляем описание команды
+     */
     public function configure(): void
     {
         $this->setDescription('Воркер для добавления webhooks к аккаунту amoCRM');

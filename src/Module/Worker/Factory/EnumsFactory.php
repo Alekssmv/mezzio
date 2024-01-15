@@ -10,7 +10,7 @@ use Module\Worker\Enums;
 use Psr\Container\ContainerInterface;
 
 /**
- * Фабрика для создания экземпляра воркера по установке unisender api key
+ * Фабрика для создания экземпляра воркера по установке enum codes
  */
 class EnumsFactory
 {

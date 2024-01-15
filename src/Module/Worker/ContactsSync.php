@@ -235,6 +235,9 @@ class ContactsSync extends BaseWorker
         return;
     }
 
+    /**
+     * Добавляем воркеру описание
+     */
     public function configure(): void
     {
         $this->setDescription('Воркер для синхронизации контактов');

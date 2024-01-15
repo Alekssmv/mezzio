@@ -11,7 +11,7 @@ use Psr\Container\ContainerInterface;
 use App\Factory\AmoCRMApiClientFactory;
 
 /**
- * Фабрика для создания экземпляра воркера по установке unisender api key
+ * Фабрика для создания экземпляра воркера по установке вебхуков
  */
 class WebhooksFactory
 {

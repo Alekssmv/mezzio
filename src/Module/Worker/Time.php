@@ -21,6 +21,9 @@ class Time extends BaseWorker
         echo "Now time: {$time}\n";
     }
 
+    /**
+     * Добавляем описание команды
+     */
     public function configure(): void
     {
         $this->setDescription('Воркер для обработки задач по выводу времени');

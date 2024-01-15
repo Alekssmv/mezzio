@@ -128,6 +128,9 @@ class Token extends BaseWorker
         return;
     }
 
+    /**
+     * Добавляем описание команды
+     */
     public function configure(): void
     {
         $this->setDescription('Воркер для добавления access token в базу данных');

@@ -41,13 +41,19 @@ class Enums extends BaseWorker
         $accountService = $this->accountService;
         $messagesPrefix = $this->messagesPrefix;
 
+        /**
+         * Проверяем наличие account_id
+         */
         if (!isset($params['account_id'])) {
             echo $messagesPrefix . 'account_id is required' . PHP_EOL;
             return;
         }
 
+        /**
+         * Добавляем enum коды
+         */
         try {
-            $this->accountService->addEnumCodes((int) $params['account_id'], ['WORK']);
+            $accountService->addEnumCodes((int) $params['account_id'], ['WORK']);
         } catch (Exception $e) {
             echo $messagesPrefix . $e->getMessage() . PHP_EOL;
             return;
@@ -56,6 +62,9 @@ class Enums extends BaseWorker
         echo $messagesPrefix . 'Enum codes were added to account with id ' . $params['account_id'] . PHP_EOL;
     }
 
+    /**
+     * Добавляем описание команды
+     */
     public function configure(): void
     {
         $this->setDescription('Воркер для добавления enums к аккаунту');
