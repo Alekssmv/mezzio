@@ -10,7 +10,7 @@ use Exception;
 /**
  * Воркер для обработки задач по выводу времени
  */
-class UniSenderApiKey extends BaseWorker
+class Enums extends BaseWorker
 {
     /**
      * @var AccountService - сервис для работы с аккаунтами
@@ -38,26 +38,26 @@ class UniSenderApiKey extends BaseWorker
     public function process($data): void
     {
         $params = $data;
+        $accountService = $this->accountService;
         $messagesPrefix = $this->messagesPrefix;
 
-        if (!isset($params['unisender_key']) && !isset($params['account_id'])) {
-            echo $messagesPrefix . 'unisender_key and account_id are required' . PHP_EOL;
+        if (!isset($params['account_id'])) {
+            echo $messagesPrefix . 'account_id is required' . PHP_EOL;
             return;
         }
 
         try {
-            $account = $this->accountService->findOrCreate((int) $params['account_id']);
-            $account = $this->accountService->addUnisenderApiKey((int) $params['account_id'], $params['unisender_key']);
+            $this->accountService->addEnumCodes((int) $params['account_id'], ['WORK']);
         } catch (Exception $e) {
             echo $messagesPrefix . $e->getMessage() . PHP_EOL;
             return;
         }
 
-        echo $messagesPrefix . 'Unisender api key was added to account with id ' . $account->account_id . PHP_EOL;
+        echo $messagesPrefix . 'Enum codes were added to account with id ' . $params['account_id'] . PHP_EOL;
     }
 
     public function configure(): void
     {
-        $this->setDescription('Воркер для добавления unisender api key в базу данных');
+        $this->setDescription('Воркер для добавления enums к аккаунту');
     }
 }

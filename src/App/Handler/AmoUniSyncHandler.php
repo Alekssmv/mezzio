@@ -17,6 +17,8 @@ use League\OAuth2\Client\Token\AccessToken;
 use App\Services\ContactService;
 use App\Helper\ArrayHelper;
 use App\Services\EmailEnumService;
+use Pheanstalk\Pheanstalk;
+use Module\Config\Beanstalk as BeanstalkConfig;
 
 class AmoUniSyncHandler implements RequestHandlerInterface
 {
@@ -50,207 +52,220 @@ class AmoUniSyncHandler implements RequestHandlerInterface
      */
     private $emailEnumService;
 
+    /**
+     * @var Pheanstalk - подключение к beanstalk
+     */
+    private $beanstalk;
+
     public function __construct(
-        UnisenderApi $unisenderApi,
-        ContactFormatterService $contactFormatterService,
-        AccountService $accountService,
-        AmoCRMApiClient $amoApiClient,
-        ContactService $contactService,
-        EmailEnumService $emailEnumService
+        // UnisenderApi $unisenderApi,
+        // ContactFormatterService $contactFormatterService,
+        // AccountService $accountService,
+        // AmoCRMApiClient $amoApiClient,
+        // ContactService $contactService,
+        // EmailEnumService $emailEnumService,
+        BeanstalkConfig $beanstalkConfig
     ) {
-        $this->unisenderApi = $unisenderApi;
-        $this->contactFormatterService = $contactFormatterService;
-        $this->accountService = $accountService;
-        $this->amoApiClient = $amoApiClient;
-        $this->contactService = $contactService;
-        $this->emailEnumService = $emailEnumService;
+        // $this->unisenderApi = $unisenderApi;
+        // $this->contactFormatterService = $contactFormatterService;
+        // $this->accountService = $accountService;
+        // $this->amoApiClient = $amoApiClient;
+        // $this->contactService = $contactService;
+        // $this->emailEnumService = $emailEnumService;
+        $this->beanstalk = $beanstalkConfig->getConnection();
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        /**
-         * @var AmoCRMApiClient $amoApiClient
-         */
-        $amoApiClient = $this->amoApiClient;
+        $params = $request->getQueryParams();
+        $beanstalk = $this->beanstalk;
 
-        /**
-         * @var UnisenderApi $unisenderApi
-         */
-        $unisenderApi = $this->unisenderApi;
+        $beanstalk->useTube('contacts-sync')->put(json_encode($params));
+        return new JsonResponse(['success' => 'Job to sync contacts was added to queue'], 200);
 
-        /**
-         * @var ContactFormatterService $contactFormatterService
-         */
-        $contactFormatterService = $this->contactFormatterService;
+        // /**
+        //  * @var AmoCRMApiClient $amoApiClient
+        //  */
+        // $amoApiClient = $this->amoApiClient;
 
-        /**
-         * @var AccountService $accountService
-         */
-        $accountService = $this->accountService;
+        // /**
+        //  * @var UnisenderApi $unisenderApi
+        //  */
+        // $unisenderApi = $this->unisenderApi;
 
-        /**
-         * @var ContactService $contactService
-         */
-        $contactService = $this->contactService;
+        // /**
+        //  * @var ContactFormatterService $contactFormatterService
+        //  */
+        // $contactFormatterService = $this->contactFormatterService;
 
-        /**
-         * @var EmailEnumService $emailEnumService
-         */
-        $emailEnumService = $this->emailEnumService;
+        // /**
+        //  * @var AccountService $accountService
+        //  */
+        // $accountService = $this->accountService;
 
-        $uniApiKey = null;
-        $account = null;
-        $contactsBuff = [];
-        $contactsToDel = [];
+        // /**
+        //  * @var ContactService $contactService
+        //  */
+        // $contactService = $this->contactService;
 
-        /**
-         * Получаем контакты из запроса и действия, которое нужно с ними сделать
-         */
-        $params = $request->getParsedBody();
+        // /**
+        //  * @var EmailEnumService $emailEnumService
+        //  */
+        // $emailEnumService = $this->emailEnumService;
 
-        /**
-         * Проверяем, что в запросе есть нужные параметры
-         */
-        if (!isset($params['account']) && !isset($params['contacts'])) {
-            return new JsonResponse(['error' => 'Invalid request'], 400);
-        }
-        if (empty($params['contacts'])) {
-            return new JsonResponse(['error' => 'Contacts are empty'], 400);
-        }
+        // $uniApiKey = null;
+        // $account = null;
+        // $contactsBuff = [];
+        // $contactsToDel = [];
 
-        try {
-            $account = $this->accountService->findOrCreate((int) $params['account']['id']);
-            $uniApiKey = $account->unisender_api_key;
-            $accessToken = $account->amo_access_jwt;
+        // /**
+        //  * Получаем контакты из запроса и действия, которое нужно с ними сделать
+        //  */
+        // $params = $request->getParsedBody();
 
-            if ($uniApiKey === null) {
-                throw new Exception('Unisender api key is not set');
-            }
-            if ($accessToken === null) {
-                throw new Exception('AmoCRM access token is not set');
-            }
+        // /**
+        //  * Проверяем, что в запросе есть нужные параметры
+        //  */
+        // if (!isset($params['account']) && !isset($params['contacts'])) {
+        //     return new JsonResponse(['error' => 'Invalid request'], 400);
+        // }
+        // if (empty($params['contacts'])) {
+        //     return new JsonResponse(['error' => 'Contacts are empty'], 400);
+        // }
 
-            /**
-             * Устанавливаем accessToken для AmoCRM
-             */
-            $json = json_decode($accessToken, true);
-            $accessToken = new AccessToken(
-                [
-                    'access_token' => $json['accessToken'],
-                    'refresh_token' => $json['refreshToken'],
-                    'expires' => $json['expires'],
-                    'base_domain' => $json['baseDomain'],
-                ]
-            );
-            $amoApiClient->setAccessToken($accessToken);
-            $amoApiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
-        } catch (Exception $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 400);
-        }
+        // try {
+        //     $account = $this->accountService->findOrCreate((int) $params['account']['id']);
+        //     $uniApiKey = $account->unisender_api_key;
+        //     $accessToken = $account->amo_access_jwt;
 
-        /**
-         * Получаем id enum полей для email
-         */
-        $emailEnumCodes = json_decode($accountService->findByAccountId((int) $params['account']['id'])->enum_codes);
-        $emailEnumCodes = array_flip($emailEnumCodes);
-        $customFields = $amoApiClient->customFields('contacts')->get()->toArray();
-        $emailField = $emailEnumService->findEmailField($customFields);
-        $enumIds = $emailEnumService->findEmailEnumIds($emailField, $emailEnumCodes);
+        //     if ($uniApiKey === null) {
+        //         throw new Exception('Unisender api key is not set');
+        //     }
+        //     if ($accessToken === null) {
+        //         throw new Exception('AmoCRM access token is not set');
+        //     }
 
-        /**
-         * Обрабатываем контакты
-         */
-        foreach ($params['contacts'] as $action => $contacts) {
+        //     /**
+        //      * Устанавливаем accessToken для AmoCRM
+        //      */
+        //     $json = json_decode($accessToken, true);
+        //     $accessToken = new AccessToken(
+        //         [
+        //             'access_token' => $json['accessToken'],
+        //             'refresh_token' => $json['refreshToken'],
+        //             'expires' => $json['expires'],
+        //             'base_domain' => $json['baseDomain'],
+        //         ]
+        //     );
+        //     $amoApiClient->setAccessToken($accessToken);
+        //     $amoApiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
+        // } catch (Exception $e) {
+        //     return new JsonResponse(['error' => $e->getMessage()], 400);
+        // }
 
-            /**
-             * Обработка для добавления контактов
-             */
-            if ($action === 'add') {
-                $contacts = $contactFormatterService->formatContacts(
-                    $contacts,
-                    CUSTOM_FIELD_NAMES,
-                    FIELDS,
-                    FIELDS_MULTI_VAL,
-                    $enumIds,
-                );
-                $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
-                $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
-                $contactsBuff = array_merge($contactsBuff, $contacts);
+        // /**
+        //  * Получаем id enum полей для email
+        //  */
+        // $emailEnumCodes = json_decode($accountService->findByAccountId((int) $params['account']['id'])->enum_codes);
+        // $emailEnumCodes = array_flip($emailEnumCodes);
+        // $customFields = $amoApiClient->customFields('contacts')->get()->toArray();
+        // $emailField = $emailEnumService->findEmailField($customFields);
+        // $enumIds = $emailEnumService->findEmailEnumIds($emailField, $emailEnumCodes);
 
-                /**
-                 * Обработка для обновления контактов
-                 */
-            } elseif ($action === 'update') {
-                $contacts = $contactFormatterService->formatContacts(
-                    $contacts,
-                    CUSTOM_FIELD_NAMES,
-                    FIELDS,
-                    FIELDS_MULTI_VAL,
-                    $enumIds,
-                );
-                $newEmails = array_column($contacts, 'email', 'id');
-                $oldEmails = $contactService->getEmails(array_column($contacts, 'id'));
-                $emailsToRemove = ArrayHelper::arrayDiffRecursive($oldEmails, $newEmails);
-                $contactsToDel = $contactFormatterService->prepareContactsForDelete($contacts, $emailsToRemove);
-                $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
-                $contactsBuff = array_merge($contactsBuff, $contacts, $contactsToDel);
+        // /**
+        //  * Обрабатываем контакты
+        //  */
+        // foreach ($params['contacts'] as $action => $contacts) {
 
-                /**
-                 * Обработка для удаления контактов
-                 */
-            } elseif ($action === 'delete') {
-                $ids = array_column($contacts, 'id');
-                $emails = $contactService->getEmails($ids);
-                $contactsToDel = $contactFormatterService->prepareContactsForDelete($contacts, $emails);
-                $contactsBuff = array_merge($contactsBuff, $contactsToDel);
-            }
-        }
-        /**
-         * Получаем все поля для Unisender, кроме id
-         */
-        $fieldNames = $contactFormatterService->getFieldNames(
-            CUSTOM_FIELD_NAMES,
-            [
-                'name' => 'Name',
-                'delete' => 'delete',
-            ],
-            FIELDS_MULTI_VAL,
-        );
-        $data = $contactFormatterService->getDataForUnisender($contactsBuff, $fieldNames);
+        //     /**
+        //      * Обработка для добавления контактов
+        //      */
+        //     if ($action === 'add') {
+        //         $contacts = $contactFormatterService->formatContacts(
+        //             $contacts,
+        //             CUSTOM_FIELD_NAMES,
+        //             FIELDS,
+        //             FIELDS_MULTI_VAL,
+        //             $enumIds,
+        //         );
+        //         $contacts = $contactFormatterService->filterContacts($contacts, REQ_FIELDS);
+        //         $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
+        //         $contactsBuff = array_merge($contactsBuff, $contacts);
 
-        $params = [
-            'format' => 'json',
-            'api_key' => $uniApiKey,
-            'field_names' => $fieldNames,
-            'data' => $data,
-        ];
-        $response = $unisenderApi->importContacts($params);
-        $response = (json_decode($response)->result);
+        //         /**
+        //          * Обработка для обновления контактов
+        //          */
+        //     } elseif ($action === 'update') {
+        //         $contacts = $contactFormatterService->formatContacts(
+        //             $contacts,
+        //             CUSTOM_FIELD_NAMES,
+        //             FIELDS,
+        //             FIELDS_MULTI_VAL,
+        //             $enumIds,
+        //         );
+        //         $newEmails = array_column($contacts, 'email', 'id');
+        //         $oldEmails = $contactService->getEmails(array_column($contacts, 'id'));
+        //         $emailsToRemove = ArrayHelper::arrayDiffRecursive($oldEmails, $newEmails);
+        //         $contactsToDel = $contactFormatterService->prepareContactsForDelete($contacts, $emailsToRemove);
+        //         $contacts = $contactFormatterService->dublicateContacts($contacts, REQ_FIELDS);
+        //         $contactsBuff = array_merge($contactsBuff, $contacts, $contactsToDel);
 
-        /**
-         * Получаем индексы контактов, в которых произошла ошибка и пропускаем их
-         */
-        $indexesToSkip = [];
-        if (!empty($response->log)) {
-            foreach ($response->log as $val) {
-                $indexesToSkip[] = $val->index;
-            }
-        }
-        $indexesToSkip = array_flip($indexesToSkip);
+        //         /**
+        //          * Обработка для удаления контактов
+        //          */
+        //     } elseif ($action === 'delete') {
+        //         $ids = array_column($contacts, 'id');
+        //         $emails = $contactService->getEmails($ids);
+        //         $contactsToDel = $contactFormatterService->prepareContactsForDelete($contacts, $emails);
+        //         $contactsBuff = array_merge($contactsBuff, $contactsToDel);
+        //     }
+        // }
+        // /**
+        //  * Получаем все поля для Unisender, кроме id
+        //  */
+        // $fieldNames = $contactFormatterService->getFieldNames(
+        //     CUSTOM_FIELD_NAMES,
+        //     [
+        //         'name' => 'Name',
+        //         'delete' => 'delete',
+        //     ],
+        //     FIELDS_MULTI_VAL,
+        // );
+        // $data = $contactFormatterService->getDataForUnisender($contactsBuff, $fieldNames);
 
-        /**
-         * Добавляем и удаляем контакты, в которых не произошло ошибки
-         */
-        foreach ($contactsBuff as $key => $contact) {
-            if (isset($indexesToSkip[$key])) {
-                continue;
-            } elseif (isset($contact['delete']) && $contact['delete'] == 1) {
-                $contactService->deleteEmail($contact['email'], (int) $contact['id']);
-            } else {
-                $contactService->createOrUpdate(['id' => $contact['id'], 'email' => $contact['email']]);
-            }
-        }
+        // $params = [
+        //     'format' => 'json',
+        //     'api_key' => $uniApiKey,
+        //     'field_names' => $fieldNames,
+        //     'data' => $data,
+        // ];
+        // $response = $unisenderApi->importContacts($params);
+        // $response = (json_decode($response)->result);
 
-        return new JsonResponse(['success' => $response], 200);
+        // /**
+        //  * Получаем индексы контактов, в которых произошла ошибка и пропускаем их
+        //  */
+        // $indexesToSkip = [];
+        // if (!empty($response->log)) {
+        //     foreach ($response->log as $val) {
+        //         $indexesToSkip[] = $val->index;
+        //     }
+        // }
+        // $indexesToSkip = array_flip($indexesToSkip);
+
+        // /**
+        //  * Добавляем и удаляем контакты, в которых не произошло ошибки
+        //  */
+        // foreach ($contactsBuff as $key => $contact) {
+        //     if (isset($indexesToSkip[$key])) {
+        //         continue;
+        //     } elseif (isset($contact['delete']) && $contact['delete'] == 1) {
+        //         $contactService->deleteEmail($contact['email'], (int) $contact['id']);
+        //     } else {
+        //         $contactService->createOrUpdate(['id' => $contact['id'], 'email' => $contact['email']]);
+        //     }
+        // }
+
+        // return new JsonResponse(['success' => $response], 200);
     }
 }

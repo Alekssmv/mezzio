@@ -57,44 +57,21 @@ class GetTokenHandler implements RequestHandlerInterface
         $beanstalk = $this->beanstalk;
         $tasks = [];
 
-        /**
-         * @var AccountService $accountService
-         */
-        $accountService = $this->accountService;
-        $accessToken = null;
-
         if (isset($params['account_id'])) {
-            $beanstalk->useTube('webhook')->put(json_encode($params['account_id']));
-            $beanstalk->useTube('enum')->put(json_encode($params['account_id']));
-            $tasks[] = 'webhook';
-            $tasks[] = 'enum';
-        }
-
-        if (
-            isset($params['account_id']) ||
-            isset($params['code'],
-            $params['referer'],
-            $params['client_id']
-        )
-        ) {
+            $beanstalk->useTube('webhooks')->put(json_encode($params));
+            $tasks[] = 'webhooks';
+            $beanstalk->useTube('enums')->put(json_encode($params));
+            $tasks[] = 'enums';
             $beanstalk->useTube('token')->put(json_encode($params));
             $tasks[] = 'token';
+            return new JsonResponse(['success' => true, 'message' => 'Tasks added to queue: ' . implode(', ', $tasks)]);
         }
 
-        // /**
-        //  * Устанавливаем вебхук
-        //  */
-        // if ($apiClient->webhooks()->get() === null) {
-        //     $webhookModel = new WebhookModel();
-        //     $webhookModel->setDestination($_ENV['NGROK_HOSTNAME'] . '/api/v1/amo-uni-sync');
-        //     $webhookModel->setSettings(['add_contact', 'update_contact', 'delete_contact']);
-        //     $apiClient->webhooks()->subscribe($webhookModel);
-        // }
-
-        // /**
-        //  * Устанавливаем enum_code для аккаунта
-        //  */
-        // $accountService->addEnumCodes((int) $params['account_id'], ['WORK', 'PRIV']);
+        if (isset($params['code'], $params['referer'])) {
+            $beanstalk->useTube('token')->put(json_encode($params));
+            $tasks[] = 'token';
+            return new JsonResponse(['success' => true, 'message' => 'Tasks added to queue: ' . implode(', ', $tasks)]);
+        }
 
         /**
          * Если нет параметра code, то получаем ссылку для авторизации
@@ -134,7 +111,5 @@ class GetTokenHandler implements RequestHandlerInterface
             unset($_SESSION['oauth2state']);
             exit('Invalid state');
         }
-
-        return new JsonResponse(['success' => true, 'message' => 'Tasks added to queue: ' . implode(', ', $tasks)]);
     }
 }

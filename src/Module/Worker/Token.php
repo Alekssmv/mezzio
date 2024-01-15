@@ -24,6 +24,11 @@ class Token extends BaseWorker
      */
     private AmoCRMApiClient $apiClient;
 
+    /**
+     * @var string $messagesPrefix - префикс для сообщений
+     */
+    private string $messagesPrefix;
+
     public function __construct(
         BeanstalkConfig $beanstalkConfig,
         string $tube,
@@ -33,6 +38,7 @@ class Token extends BaseWorker
         parent::__construct($beanstalkConfig, $tube);
         $this->accountService = $accountService;
         $this->apiClient = $apiClient;
+        $this->messagesPrefix = $tube . ': ';
     }
 
     /**
@@ -44,13 +50,18 @@ class Token extends BaseWorker
         $accessToken = null;
         $accountService = $this->accountService;
         $apiClient = $this->apiClient;
+        $messagesPrefix = $this->messagesPrefix;
 
         /**
          * Полчаем токен по url параметру account_id
          */
         try {
-            if ($params['account_id'] !== null) {
+            if (isset($params['account_id']) && $params['account_id'] !== null) {
                 $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
+                if ($accessToken === null) {
+                    echo $messagesPrefix . 'Access token is not found in account with id ' . $params['account_id'] . PHP_EOL;
+                    return;
+                }
                 $accessToken = json_decode((string) $accessToken, true);
                 $accessToken = new AccessToken([
                     'access_token' => $accessToken['accessToken'],
@@ -60,8 +71,8 @@ class Token extends BaseWorker
                 ]);
             }
         } catch (Exception $e) {
-            echo 'Токен аккаунта с id ' . $params['account_id'] . ' не найден или имеет неверный формат' . PHP_EOL;
-            echo $e->getMessage() . PHP_EOL;
+            echo $messagesPrefix . 'Can\'t get access token by account_id' . PHP_EOL;
+            echo $messagesPrefix . $e->getMessage() . PHP_EOL;
             return;
         }
 
@@ -69,12 +80,17 @@ class Token extends BaseWorker
          * Если токен есть и он не истек, то возвращаем ответ success
          */
         if ($accessToken !== null && !$accessToken->hasExpired()) {
-            echo 'Токен аккаунта с id ' . $params['account_id'] . ' есть и не истек' . PHP_EOL;
+            echo $messagesPrefix . 'Access token is valid for account with id ' . $params['account_id'] . PHP_EOL;
             return;
         }
         if ($accessToken !== null && $accessToken->hasExpired()) {
-            $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
-            echo 'Токен аккаунта с id ' . $params['account_id'] . ' обновлен' . PHP_EOL;
+            try {
+                $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
+                echo $messagesPrefix . 'Access token was refreshed for account with id ' . $params['account_id'] . PHP_EOL;
+            } catch (Exception $e) {
+                echo $messagesPrefix . $e->getMessage() . PHP_EOL;
+                return;
+            }
             return;
         }
 
@@ -105,10 +121,10 @@ class Token extends BaseWorker
                 );
             }
         } catch (Exception $e) {
-            echo $e->getMessage() . PHP_EOL;
+            echo $messagesPrefix . $e->getMessage() . PHP_EOL;
             return;
         }
-        echo 'Токен аккаунта с id ' . $accountId . ' добавлен' . PHP_EOL;
+        echo $messagesPrefix . 'Access token was added to account with id ' . $accountId . PHP_EOL;
         return;
     }
 
