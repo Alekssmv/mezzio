@@ -83,7 +83,7 @@ class Token extends BaseWorker
         }
 
         /**
-         * Если токен есть и он не истек, то возвращаем ответ success
+         * Если токен есть и он не истек, то возвращаем ответ success. Также проверяем наличие параметра force_refresh
          */
         if ($accessToken !== null && (!$accessToken->hasExpired() && !isset($params['force_refresh']))) {
             echo $messagesPrefix .
@@ -94,7 +94,7 @@ class Token extends BaseWorker
         }
 
         /**
-         * Если токен есть и он истек, то обновляем его
+         * Если токен есть и он истек или есть параметр force_refresh, то обновляем токен
          */
         if (
             $accessToken !== null && ($accessToken->hasExpired() || isset($params['force_refresh']))

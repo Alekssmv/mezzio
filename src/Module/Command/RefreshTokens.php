@@ -72,6 +72,9 @@ class RefreshTokens extends Command
 
         $accountIds = $accountService->getAllIds();
 
+        /**
+         * Перебираем все аккаунты и добавляем задачи в очередь
+         */
         foreach ($accountIds as $accountId) {
             $pheanstalk->useTube('token')->put(json_encode([
                 'account_id' => $accountId,
