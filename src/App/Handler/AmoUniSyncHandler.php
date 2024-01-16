@@ -30,6 +30,9 @@ class AmoUniSyncHandler implements RequestHandlerInterface
         $beanstalk = $this->beanstalk;
 
         $beanstalk->useTube('contacts-sync')->put(json_encode($params));
-        return new JsonResponse(['success' => 'Job to sync contacts was added to queue'], 200);
+        return new JsonResponse(
+            ['success' => 'Job to sync contacts was added to queue'],
+            200
+        );
     }
 }

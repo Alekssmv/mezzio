@@ -47,46 +47,64 @@ class Token extends BaseWorker
     public function process($data): void
     {
         $params = $data;
-        $accessToken = null;
         $accountService = $this->accountService;
         $apiClient = $this->apiClient;
         $messagesPrefix = $this->messagesPrefix;
+        $accessToken = null;
 
         /**
-         * Полчаем токен по url параметру account_id
+         * Ищем аккаунт по параметру account_id, если он задан,
+         * берем токен из него
          */
-        try {
-            if (isset($params['account_id']) && $params['account_id'] !== null) {
-                $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
-                if ($accessToken === null) {
-                    echo $messagesPrefix . 'Access token is not found in account with id ' . $params['account_id'] . PHP_EOL;
+        if (isset($params['account_id']) && !empty($params['account_id'])) {
+            $accessToken = $accountService
+                ->findOrCreate((int) $params['account_id'])
+                ->amo_access_jwt;
+
+            if ($accessToken !== null) {
+                try {
+                    $accessToken = json_decode((string) $accessToken, true);
+                    $accessToken = new AccessToken([
+                        'access_token' => $accessToken['accessToken'],
+                        'refresh_token' => $accessToken['refreshToken'],
+                        'expires' => $accessToken['expires'],
+                        'base_domain' => $accessToken['baseDomain'],
+                    ]);
+                } catch (Exception $e) {
+                    echo $messagesPrefix .
+                        'Can\'t get access token by account_id' .
+                        PHP_EOL;
+
+                    echo $messagesPrefix . $e->getMessage() . PHP_EOL;
                     return;
                 }
-                $accessToken = json_decode((string) $accessToken, true);
-                $accessToken = new AccessToken([
-                    'access_token' => $accessToken['accessToken'],
-                    'refresh_token' => $accessToken['refreshToken'],
-                    'expires' => $accessToken['expires'],
-                    'base_domain' => $accessToken['baseDomain'],
-                ]);
             }
-        } catch (Exception $e) {
-            echo $messagesPrefix . 'Can\'t get access token by account_id' . PHP_EOL;
-            echo $messagesPrefix . $e->getMessage() . PHP_EOL;
-            return;
         }
 
         /**
          * Если токен есть и он не истек, то возвращаем ответ success
          */
         if ($accessToken !== null && !$accessToken->hasExpired()) {
-            echo $messagesPrefix . 'Access token is valid for account with id ' . $params['account_id'] . PHP_EOL;
+            echo $messagesPrefix .
+                'Access token is valid for account with id ' .
+                $params['account_id'] .
+                PHP_EOL;
             return;
         }
+
+        /**
+         * Если токен есть и он истек, то обновляем его
+         */
         if ($accessToken !== null && $accessToken->hasExpired()) {
             try {
-                $apiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
-                echo $messagesPrefix . 'Access token was refreshed for account with id ' . $params['account_id'] . PHP_EOL;
+                $apiClient
+                    ->getOAuthClient()
+                    ->getAccessTokenByRefreshToken($accessToken);
+
+                echo $messagesPrefix .
+                    'Access token was refreshed for account with id ' .
+                    $params['account_id'] .
+                    PHP_EOL;
             } catch (Exception $e) {
                 echo $messagesPrefix . $e->getMessage() . PHP_EOL;
                 return;
@@ -94,6 +112,9 @@ class Token extends BaseWorker
             return;
         }
 
+        /**
+         * Задаем домен для apiClient для взаимодействия с amoCRM
+         */
         if (isset($params['referer'])) {
             $apiClient->setAccountBaseDomain($params['referer']);
         }
@@ -102,10 +123,16 @@ class Token extends BaseWorker
          * Ловим обратный код
          */
         try {
-            $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
-            $apiClient->setAccessToken($accessToken);
+            $accessToken = $apiClient
+                ->getOAuthClient()
+                ->getAccessTokenByCode($params['code']);
 
+            $apiClient->setAccessToken($accessToken);
             $accountId = $apiClient->account()->getCurrent()->toArray()['id'];
+
+            /**
+             * Если полученный токен не истек, то добавляем его в базу данных
+             */
             if (!$accessToken->hasExpired()) {
                 $accountService->findOrCreate((int) $accountId);
                 $accountService->addAmoToken(
@@ -124,7 +151,10 @@ class Token extends BaseWorker
             echo $messagesPrefix . $e->getMessage() . PHP_EOL;
             return;
         }
-        echo $messagesPrefix . 'Access token was added to account with id ' . $accountId . PHP_EOL;
+        echo $messagesPrefix .
+            'Access token was added to account with id ' .
+            $accountId .
+            PHP_EOL;
         return;
     }
 
@@ -133,6 +163,7 @@ class Token extends BaseWorker
      */
     public function configure(): void
     {
-        $this->setDescription('Воркер для добавления access token в базу данных');
+        $this
+            ->setDescription('Воркер для добавления access token в базу данных');
     }
 }

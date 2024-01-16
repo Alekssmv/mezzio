@@ -36,7 +36,8 @@ class GetUniApiKeyHandler implements RequestHandlerInterface
 
         return new JsonResponse([
             'success' => true,
-            'message' => 'Задача на добавление unisender api key в очередь успешно добавлена'
+            'message' => 'Задача на добавление unisender api key 
+            в очередь успешно добавлена'
         ]);
     }
 }
