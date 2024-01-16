@@ -78,12 +78,29 @@ class RefreshTokens extends Command
                     'expires' => $accessToken['expires'],
                     'baseDomain' => $accessToken['baseDomain'],
                 ]);
-                $accessToken = $amoCRMApiClient->getOAuthClient()->getAccessTokenByRefreshToken($accessToken);
-                $accountService->addAmoToken($accountId, $accessToken->jsonSerialize());
+
+                /**
+                 * Получаем baseDomain из токена, т.к. после обновления токена
+                 * baseDomain слетает
+                 */
+                $baseDomain = $accessToken->getValues()['baseDomain'];
+
+                $accessToken = $amoCRMApiClient
+                    ->getOAuthClient()
+                    ->getAccessTokenByRefreshToken($accessToken);
+                $accountService
+                    ->addAmoToken($accountId, json_encode([
+                        'accessToken' => $accessToken->getToken(),
+                        'refreshToken' => $accessToken->getRefreshToken(),
+                        'expires' => $accessToken->getExpires(),
+                        'baseDomain' => $baseDomain,
+                    ]));
                 echo "Токен аккаунта {$accountId} обновлен" . PHP_EOL;
                 continue;
             } catch (Exception $e) {
-                echo "Ошибка обновления токена аккаунта {$accountId}" . $e->getMessage() . PHP_EOL;
+                echo "Ошибка обновления токена аккаунта {$accountId}" .
+                $e->getMessage() .
+                PHP_EOL;
                 continue;
             }
         }
