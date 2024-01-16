@@ -7,6 +7,7 @@ namespace App\Factory;
 use App\Handler\GetUniApiKeyHandler;
 use App\Interfaces\Service\AccountServiceInterface;
 use Psr\Container\ContainerInterface;
+use Module\Config\Beanstalk as BeanstalkConfig;
 
 class GetUniApiKeyHandlerFactory
 {
@@ -15,6 +16,7 @@ class GetUniApiKeyHandlerFactory
         return new GetUniApiKeyHandler(
             $container->get(AmoCRMApiClientFactory::class),
             $container->get(AccountServiceInterface ::class),
+            new BeanstalkConfig($container)
         );
     }
 }

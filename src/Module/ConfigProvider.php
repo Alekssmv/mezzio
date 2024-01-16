@@ -20,7 +20,12 @@ class ConfigProvider
                 Command\HowTime::class => Command\HowTime::class,
             ],
             'factories' => [
-                Worker\Time::class => Worker\TimeFactory::class,
+                Worker\Time::class => Worker\Factory\TimeFactory::class,
+                Worker\UniSenderApiKey::class => Worker\Factory\UniSenderApiKeyFactory::class,
+                Worker\Token::class => Worker\Factory\TokenFactory::class,
+                Worker\Enums::class => Worker\Factory\EnumsFactory::class,
+                Worker\Webhooks::class => Worker\Factory\WebhooksFactory::class,
+                Worker\ContactsSync::class => Worker\Factory\ContactsSyncFactory::class,
             ]
         ];
     }
@@ -30,7 +35,13 @@ class ConfigProvider
         return [
             'commands' => [
                 'how-time' => Command\HowTime::class,
-                'time-worker' => Worker\Time::class,
+                'worker:time' => Worker\Time::class,
+
+                'worker:unisender-api-key' => Worker\UniSenderApiKey::class,
+                'worker:token' => Worker\Token::class,
+                'worker:enums' => Worker\Enums::class,
+                'worker:webhooks' => Worker\Webhooks::class,
+                'worker:contacts-sync' => Worker\ContactsSync::class,
             ],
         ];
     }

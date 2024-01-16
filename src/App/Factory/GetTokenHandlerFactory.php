@@ -7,6 +7,7 @@ namespace App\Factory;
 use App\Interfaces\Service\AccountServiceInterface;
 use Psr\Container\ContainerInterface;
 use App\Handler\GetTokenHandler;
+use Module\Config\Beanstalk as BeanstalkConfig;
 
 class GetTokenHandlerFactory
 {
@@ -15,6 +16,7 @@ class GetTokenHandlerFactory
         return new GetTokenHandler(
             $container->get(AmoCRMApiClientFactory::class),
             $container->get(AccountServiceInterface::class),
+            new BeanstalkConfig($container),
         );
     }
 }

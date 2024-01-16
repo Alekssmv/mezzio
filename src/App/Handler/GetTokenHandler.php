@@ -7,13 +7,12 @@ namespace App\Handler;
 use AmoCRM\Client\AmoCRMApiClient;
 use App\Services\AccountService;
 use Laminas\Diactoros\Response\JsonResponse;
-use Laminas\Diactoros\Response\RedirectResponse;
+use League\OAuth2\Client\Token\AccessToken;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Exception;
-use League\OAuth2\Client\Token\AccessToken;
-use AmoCRM\Models\WebhookModel;
+use Pheanstalk\Pheanstalk;
+use Module\Config\Beanstalk as BeanstalkConfig;
 
 class GetTokenHandler implements RequestHandlerInterface
 {
@@ -23,16 +22,23 @@ class GetTokenHandler implements RequestHandlerInterface
     private AmoCRMApiClient $apiClient;
 
     /**
+     * @var Pheanstalk - подключение к beanstalk
+     */
+    private $beanstalk;
+
+    /**
      * @var AccountService - сервис для работы с аккаунтами
      */
     private AccountService $accountService;
 
     public function __construct(
         AmoCRMApiClient $apiClient,
-        AccountService $accountService
+        AccountService $accountService,
+        BeanstalkConfig $beanstalkConfig
     ) {
         $this->apiClient = $apiClient;
         $this->accountService = $accountService;
+        $this->beanstalk = $beanstalkConfig->getConnection();
     }
     /**
      * Сохраняет токен в TOKEN_FILE локально, если он еще не получен или истек
@@ -40,67 +46,61 @@ class GetTokenHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-
         /**
          * Параметры запроса
          */
         $params = $request->getQueryParams();
-        $apiClient = $this->apiClient;
-
-        /**
-         * @var AccountService $accountService
-         */
         $accountService = $this->accountService;
-        $accessToken = null;
+        $apiClient = $this->apiClient;
+        $beanstalk = $this->beanstalk;
+        $tasks = [];
+        $token = null;
 
         /**
-         * Полчаем токен по url параметру account_id
+         * Ищем аккаунт по account_id, берем токен из него
          */
-        try {
-            if ($params['account_id'] !== null) {
-                $accessToken = $accountService->findOrCreate((int) $params['account_id'])->amo_access_jwt;
-                $accessToken = json_decode((string) $accessToken, true);
-                $accessToken = new AccessToken([
-                    'access_token' => $accessToken['accessToken'],
-                    'refresh_token' => $accessToken['refreshToken'],
-                    'expires' => $accessToken['expires'],
-                    'base_domain' => $accessToken['baseDomain'],
-                ]);
-            }
-        } catch (Exception $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 500);
+        if (isset($params['account_id']) && !empty($params['account_id'])) {
+            $account = $accountService
+                ->findByAccountId((int) $params['account_id']);
+            $token = $account->amo_access_jwt;
+
+            /**
+             * Если есть параметр account_id, то добавляем задачи на добавление
+             * вебхуков и enum в очередь
+             */
+            $beanstalk->useTube('webhooks')->put(json_encode($params));
+            $tasks[] = 'webhooks';
+            $beanstalk->useTube('enums')->put(json_encode($params));
+            $tasks[] = 'enums';
         }
 
         /**
-         * Если токен есть и он не истек, то возвращаем ответ success
+         * Если токен есть, то добавляем задачу в очередь,
+         * чтобы проверить токен на валидность
+         * и обновить его, если он истек
          */
-        if ($accessToken !== null && !$accessToken->hasExpired()) {
-            $apiClient->setAccessToken($accessToken);
-            $apiClient->setAccountBaseDomain($accessToken->getValues()['base_domain']);
-
-            /**
-             * Устанавливаем вебхук
-             */
-            if ($apiClient->webhooks()->get() === null) {
-                $webhookModel = new WebhookModel();
-                $webhookModel->setDestination($_ENV['NGROK_HOSTNAME'] . '/api/v1/amo-uni-sync');
-                $webhookModel->setSettings(['add_contact', 'update_contact', 'delete_contact']);
-                $apiClient->webhooks()->subscribe($webhookModel);
-            }
-
-            /**
-             * Устанавливаем enum_code для аккаунта
-             */
-            $accountService->addEnumCodes((int) $params['account_id'], ['WORK']);
-
-            return new JsonResponse(['success' => true]);
+        if ($token !== null) {
+            $beanstalk->useTube('token')->put(json_encode($params));
+            $tasks[] = 'token';
         }
 
-        if (isset($params['referer'])) {
-            $apiClient->setAccountBaseDomain($params['referer']);
+        /**
+         * Если запрос пришел с виджета, то добавляем задачу в очередь,
+         * чтобы получить токен, если его нет
+         */
+        if (
+            $token === null &&
+            isset($params['code'], $params['from_widget'], $params['referer'])
+        ) {
+            $beanstalk->useTube('token')->put(json_encode($params));
+            $tasks[] = 'token';
         }
 
-        if (!isset($params['code'])) {
+        /**
+         * Если нет параметра code и токена нет, то перенаправляем на страницу
+         * авторизации
+         */
+        if (!isset($params['code']) && $token === null) {
             $state = bin2hex(random_bytes(16));
             $_SESSION['oauth2state'] = $state;
             if (isset($params['button'])) {
@@ -128,55 +128,15 @@ class GetTokenHandler implements RequestHandlerInterface
             }
         } elseif (
             !isset($params['from_widget'])
+            && $token === null
             && (empty($params['state'])
-            || empty($_SESSION['oauth2state'])
-            || ($params['state'] !== $_SESSION['oauth2state']))
+                || empty($_SESSION['oauth2state'])
+                || ($params['state'] !== $_SESSION['oauth2state']))
         ) {
             unset($_SESSION['oauth2state']);
             exit('Invalid state');
         }
 
-        /**
-         * Ловим обратный код
-         */
-        try {
-            $accessToken = $apiClient->getOAuthClient()->getAccessTokenByCode($params['code']);
-            $apiClient->setAccessToken($accessToken);
-
-            /**
-             * Устанавливаем вебхук
-             */
-            if ($apiClient->webhooks()->get() === null) {
-                $webhookModel = new WebhookModel();
-                $webhookModel->setDestination($_ENV['NGROK_HOSTNAME'] . '/api/v1/amo-uni-sync');
-                $webhookModel->setSettings(['add_contact', 'update_contact', 'delete_contact']);
-                $apiClient->webhooks()->subscribe($webhookModel);
-            }
-
-            /**
-             * Устанавливаем enum_code для аккаунта
-             */
-            $accountService->addEnumCodes((int) $params['account_id'], ['WORK', 'PRIV']);
-
-            $accountId = $apiClient->account()->getCurrent()->toArray()['id'];
-            if (!$accessToken->hasExpired()) {
-                $accountService->findOrCreate((int) $accountId);
-                $accountService->addAmoToken(
-                    $accountId,
-                    json_encode(
-                        [
-                            'accessToken' => $accessToken->getToken(),
-                            'refreshToken' => $accessToken->getRefreshToken(),
-                            'expires' => $accessToken->getExpires(),
-                            'baseDomain' => $params['referer'],
-                        ]
-                    )
-                );
-            }
-        } catch (Exception $e) {
-            die((string) $e);
-        }
-
-        return new JsonResponse(['success' => true]);
+        return new JsonResponse(['success' => true, 'tasks' => implode(', ', $tasks)]);
     }
 }
