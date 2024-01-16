@@ -11,7 +11,7 @@ use AmoCRM\Models\WebhookModel;
 use League\OAuth2\Client\Token\AccessToken;
 
 /**
- * Воркер для обработки задач по выводу времени
+ * Воркер для добавления webhooks к аккаунту amoCRM
  */
 class Webhooks extends BaseWorker
 {

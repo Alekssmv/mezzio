@@ -15,7 +15,7 @@ use App\Helper\ArrayHelper;
 use Unisender\ApiWrapper\UnisenderApi;
 
 /**
- * Воркер для обработки задач по выводу времени
+ * Воркер для обработки задач синхронизации контактов
  */
 class ContactsSync extends BaseWorker
 {

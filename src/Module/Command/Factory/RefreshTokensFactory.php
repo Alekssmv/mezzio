@@ -8,6 +8,7 @@ use App\Factory\AmoCRMApiClientFactory;
 use App\Interfaces\Service\AccountServiceInterface;
 use Module\Command\RefreshTokens;
 use Psr\Container\ContainerInterface;
+use Module\Config\Beanstalk as BeanstalkConfig;
 
 /**
  * Фабрика для создания экземпляра команды обновления токенов
@@ -18,7 +19,7 @@ class RefreshTokensFactory
     {
         return new RefreshTokens(
             $container->get(AccountServiceInterface::class),
-            $container->get(AmoCRMApiClientFactory::class)
+            new BeanstalkConfig($container),
         );
     }
 }

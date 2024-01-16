@@ -4,11 +4,14 @@ namespace Module\Command;
 
 use AmoCRM\Client\AmoCRMApiClient;
 use App\Services\AccountService;
+use Module\Config\Beanstalk;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Exception;
 use League\OAuth2\Client\Token\AccessToken;
+use Pheanstalk\Pheanstalk;
+use Module\Config\Beanstalk as BeanstalkConfig;
 
 /**
  * Команда для обновления токенов всех аккаунтов
@@ -30,13 +33,18 @@ class RefreshTokens extends Command
      */
     private AmoCRMApiClient $amoCRMApiClient;
 
+    /**
+     * @var Pheanstalk $pheanstalk - клиент для работы с очередью
+     */
+    private Pheanstalk $pheanstalk;
+
     public function __construct(
         AccountService $accountService,
-        AmoCRMApiClient $amoCRMApiClient
+        BeanstalkConfig $beanstalkConfig
     ) {
         parent::__construct();
         $this->accountService = $accountService;
-        $this->amoCRMApiClient = $amoCRMApiClient;
+        $this->pheanstalk = $beanstalkConfig->getConnection();
     }
 
     /**
@@ -52,57 +60,23 @@ class RefreshTokens extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        /**
+         * @var AccountService $accountService - сервис для работы с аккаунтами
+         */
         $accountService = $this->accountService;
-        $amoCRMApiClient = $this->amoCRMApiClient;
+
+        /**
+         * @var Pheanstalk $pheanstalk - клиент для работы с очередью
+         */
+        $pheanstalk = $this->pheanstalk;
 
         $accountIds = $accountService->getAllIds();
+
         foreach ($accountIds as $accountId) {
-            $account = $accountService->findByAccountId($accountId);
-
-            /**
-             * Если нет токена, пропускаем
-             */
-            if ($account->amo_access_jwt === null) {
-                echo "Аккаунт {$accountId} не имеет токенов" . PHP_EOL;
-                continue;
-            }
-
-            /**
-             * Обновляем токен
-             */
-            try {
-                $accessToken = json_decode($account->amo_access_jwt, true);
-                $accessToken = new AccessToken([
-                    'access_token' => $accessToken['accessToken'],
-                    'refresh_token' => $accessToken['refreshToken'],
-                    'expires' => $accessToken['expires'],
-                    'baseDomain' => $accessToken['baseDomain'],
-                ]);
-
-                /**
-                 * Получаем baseDomain из токена, т.к. после обновления токена
-                 * baseDomain слетает
-                 */
-                $baseDomain = $accessToken->getValues()['baseDomain'];
-
-                $accessToken = $amoCRMApiClient
-                    ->getOAuthClient()
-                    ->getAccessTokenByRefreshToken($accessToken);
-                $accountService
-                    ->addAmoToken($accountId, json_encode([
-                        'accessToken' => $accessToken->getToken(),
-                        'refreshToken' => $accessToken->getRefreshToken(),
-                        'expires' => $accessToken->getExpires(),
-                        'baseDomain' => $baseDomain,
-                    ]));
-                echo "Токен аккаунта {$accountId} обновлен" . PHP_EOL;
-                continue;
-            } catch (Exception $e) {
-                echo "Ошибка обновления токена аккаунта {$accountId}" .
-                $e->getMessage() .
-                PHP_EOL;
-                continue;
-            }
+            $pheanstalk->useTube('token')->put(json_encode([
+                'account_id' => $accountId,
+                'force_refresh' => true,
+            ]));
         }
         return Command::SUCCESS;
     }

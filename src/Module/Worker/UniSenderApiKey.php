@@ -8,7 +8,7 @@ use Module\Config\Beanstalk as BeanstalkConfig;
 use Exception;
 
 /**
- * Воркер для обработки задач по выводу времени
+ * Воркер для добавления unisender api key к аккаунту
  */
 class UniSenderApiKey extends BaseWorker
 {
