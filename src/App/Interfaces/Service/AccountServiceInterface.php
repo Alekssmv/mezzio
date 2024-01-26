@@ -46,4 +46,9 @@ interface AccountServiceInterface
      * @return Account
      */
     public function addUnisenderApiKey(int $accountId, string $apiKey): Account;
+
+    /**
+     * Возвращает все id аккаунтов
+     */
+    public function getAllIds(): array;
 }

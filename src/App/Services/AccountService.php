@@ -81,4 +81,13 @@ class AccountService implements AccountServiceInterface
     {
         return $this->accountRepository->addEnumCodes($accountId, $enumCodes);
     }
+
+    /**
+     * Возвращает все id аккаунтов
+     * @return array
+     */
+    public function getAllIds(): array
+    {
+        return $this->accountRepository->getAllIds();
+    }
 }

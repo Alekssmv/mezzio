@@ -20,6 +20,7 @@ class ConfigProvider
                 Command\HowTime::class => Command\HowTime::class,
             ],
             'factories' => [
+                Command\RefreshTokens::class => Command\Factory\RefreshTokensFactory::class,
                 Worker\Time::class => Worker\Factory\TimeFactory::class,
                 Worker\UniSenderApiKey::class => Worker\Factory\UniSenderApiKeyFactory::class,
                 Worker\Token::class => Worker\Factory\TokenFactory::class,
@@ -35,8 +36,9 @@ class ConfigProvider
         return [
             'commands' => [
                 'how-time' => Command\HowTime::class,
-                'worker:time' => Worker\Time::class,
+                'refresh-tokens' => Command\RefreshTokens::class,
 
+                'worker:time' => Worker\Time::class,
                 'worker:unisender-api-key' => Worker\UniSenderApiKey::class,
                 'worker:token' => Worker\Token::class,
                 'worker:enums' => Worker\Enums::class,

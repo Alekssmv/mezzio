@@ -54,4 +54,10 @@ interface AccountRepositoryInterface
      * @return Account
      */
     public function addEnumCodes(int $accountId, array $enumCodes): Account;
+
+    /**
+     * Возвращает все id аккаунтов
+     * @return array
+     */
+    public function getAllIds(): array;
 }

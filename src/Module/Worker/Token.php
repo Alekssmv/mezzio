@@ -8,9 +8,10 @@ use Module\Worker\BaseWorker;
 use Module\Config\Beanstalk as BeanstalkConfig;
 use Exception;
 use League\OAuth2\Client\Token\AccessToken;
+use DateTimeImmutable;
 
 /**
- * Воркер для обработки задач по выводу времени
+ * Воркер для проверки, создания и обновления токенов
  */
 class Token extends BaseWorker
 {
@@ -82,9 +83,9 @@ class Token extends BaseWorker
         }
 
         /**
-         * Если токен есть и он не истек, то возвращаем ответ success
+         * Если токен есть и он не истек, то возвращаем ответ success. Также проверяем наличие параметра force_refresh
          */
-        if ($accessToken !== null && !$accessToken->hasExpired()) {
+        if ($accessToken !== null && (!$accessToken->hasExpired() && !isset($params['force_refresh']))) {
             echo $messagesPrefix .
                 'Access token is valid for account with id ' .
                 $params['account_id'] .
@@ -93,9 +94,11 @@ class Token extends BaseWorker
         }
 
         /**
-         * Если токен есть и он истек, то обновляем его
+         * Если токен есть и он истек или есть параметр force_refresh, то обновляем токен
          */
-        if ($accessToken !== null && $accessToken->hasExpired()) {
+        if (
+            $accessToken !== null && ($accessToken->hasExpired() || isset($params['force_refresh']))
+        ) {
             try {
                 $apiClient
                     ->getOAuthClient()
@@ -106,7 +109,12 @@ class Token extends BaseWorker
                     $params['account_id'] .
                     PHP_EOL;
             } catch (Exception $e) {
-                echo $messagesPrefix . $e->getMessage() . PHP_EOL;
+                echo $messagesPrefix .
+                    'Can\'t refresh access token by account_id' .
+                    PHP_EOL;
+                echo $messagesPrefix .
+                    $e->getMessage() .
+                    PHP_EOL;
                 return;
             }
             return;

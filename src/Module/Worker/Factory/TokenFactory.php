@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Module\Worker\Factory;
 
 use App\Factory\AmoCRMApiClientFactory;
+use App\Factory\DateTimeImmutableFactory;
 use App\Interfaces\Service\AccountServiceInterface;
 use Module\Config\Beanstalk;
 use Module\Worker\Token;

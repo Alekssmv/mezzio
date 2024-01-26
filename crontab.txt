@@ -1,0 +1,2 @@
+0 22 * * * /home/mezzio/vendor/bin/laminas refresh-tokens
+ 
